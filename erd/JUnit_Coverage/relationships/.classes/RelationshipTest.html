@@ -1,0 +1,208 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: RelationshipTest</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">relationships</a> ]
+</div>
+
+<h1>Coverage Summary for Class: RelationshipTest (relationships)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RelationshipTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/ 6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (81/ 81)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package relationships;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import attributes.Attribute;
+<i>4</i>&nbsp;import attributes.PrimaryKey;
+<i>5</i>&nbsp;import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+<i>6</i>&nbsp;import datatypes.TInteger;
+<i>7</i>&nbsp;import entites.Entity;
+<i>8</i>&nbsp;import model.Erd;
+<i>9</i>&nbsp;
+<i>10</i>&nbsp;import java.util.List;
+<i>11</i>&nbsp;
+<i>12</i>&nbsp;import static org.junit.jupiter.api.Assertions.*;
+<i>13</i>&nbsp;
+<b class="fc"><i>14</i>&nbsp;class RelationshipTest {</b>
+<i>15</i>&nbsp;    @org.junit.jupiter.api.Test
+<i>16</i>&nbsp;    void checkCardinalities() {
+<b class="fc"><i>17</i>&nbsp;        checkOneMany();</b>
+<b class="fc"><i>18</i>&nbsp;        checkOneOne();</b>
+<b class="fc"><i>19</i>&nbsp;        checkManyMany();</b>
+<b class="fc"><i>20</i>&nbsp;        checkLinks();</b>
+<b class="fc"><i>21</i>&nbsp;    }</b>
+<i>22</i>&nbsp;    private void checkLinks() {
+<b class="fc"><i>23</i>&nbsp;        Erd erd = new Erd();</b>
+<b class="fc"><i>24</i>&nbsp;        Relationship r = new Relationship(erd);</b>
+<b class="fc"><i>25</i>&nbsp;        assertTrue(r.getLinks().isEmpty());</b>
+<b class="fc"><i>26</i>&nbsp;        Cardinality c = new Many();</b>
+<b class="fc"><i>27</i>&nbsp;        r.addCardinality(new Many());</b>
+<b class="fc"><i>28</i>&nbsp;        assertFalse(r.getLinks().isEmpty());</b>
+<i>29</i>&nbsp;
+<b class="fc"><i>30</i>&nbsp;    }</b>
+<i>31</i>&nbsp;
+<i>32</i>&nbsp;    private void checkManyMany() {
+<b class="fc"><i>33</i>&nbsp;        Erd erd = new Erd();</b>
+<b class="fc"><i>34</i>&nbsp;        Relationship r = new Relationship(erd);</b>
+<b class="fc"><i>35</i>&nbsp;        Entity e1 = new Entity();</b>
+<b class="fc"><i>36</i>&nbsp;        e1.setName(&quot;Entita1&quot;);</b>
+<b class="fc"><i>37</i>&nbsp;        Entity e2 = new Entity();</b>
+<b class="fc"><i>38</i>&nbsp;        e2.setName(&quot;Entita2&quot;);</b>
+<i>39</i>&nbsp;
+<b class="fc"><i>40</i>&nbsp;        e1.addPrimaryKey(new PrimaryKey(&quot;Id_Entita1&quot;, new TInteger()));</b>
+<i>41</i>&nbsp;
+<b class="fc"><i>42</i>&nbsp;        Cardinality c1 = new Many();</b>
+<b class="fc"><i>43</i>&nbsp;        c1.setEntity(e1);</b>
+<b class="fc"><i>44</i>&nbsp;        r.addCardinality(c1);</b>
+<i>45</i>&nbsp;
+<b class="fc"><i>46</i>&nbsp;        Cardinality c2 = new OneOrMore();</b>
+<b class="fc"><i>47</i>&nbsp;        c2.setEntity(e2);</b>
+<b class="fc"><i>48</i>&nbsp;        r.addCardinality(c2);</b>
+<i>49</i>&nbsp;
+<b class="fc"><i>50</i>&nbsp;        assertTrue(erd.getRelationshipTables().size() == 0);</b>
+<b class="fc"><i>51</i>&nbsp;        c1.setRelationship(r);</b>
+<b class="fc"><i>52</i>&nbsp;        c2.setRelationship(r);</b>
+<b class="fc"><i>53</i>&nbsp;        assertTrue(r.getLinks().size() == 2);</b>
+<i>54</i>&nbsp;
+<b class="fc"><i>55</i>&nbsp;        List&lt;Attribute&gt; pks = erd.getRelationshipTables().get(0).getPrimaryKeys();</b>
+<b class="fc"><i>56</i>&nbsp;        List&lt;Attribute&gt; fks = erd.getRelationshipTables().get(0).getForeignKeys();</b>
+<i>57</i>&nbsp;
+<b class="fc"><i>58</i>&nbsp;        assertTrue(pks.containsAll(fks));</b>
+<b class="fc"><i>59</i>&nbsp;        assertTrue(erd.getRelationshipTables().size() == 1, &quot;Relationships&#39; tables should be of size 1&quot;);</b>
+<i>60</i>&nbsp;
+<i>61</i>&nbsp;
+<b class="fc"><i>62</i>&nbsp;        erd.getRelationshipTables().get(0).getPrimaryKeys().stream().forEach(System.out::println);</b>
+<b class="fc"><i>63</i>&nbsp;        e2.addPrimaryKey(new PrimaryKey(&quot;PK1&quot;, new TInteger()));</b>
+<b class="fc"><i>64</i>&nbsp;        for(int i = 0; i &lt; 100; i++)</b>
+<b class="fc"><i>65</i>&nbsp;            e2.addPrimaryKey(new PrimaryKey(&quot;E2_PK&quot;.concat(Integer.toString(i)), new TInteger()));</b>
+<i>66</i>&nbsp;
+<b class="fc"><i>67</i>&nbsp;        pks = erd.getRelationshipTables().get(0).getPrimaryKeys();</b>
+<b class="fc"><i>68</i>&nbsp;        fks = erd.getRelationshipTables().get(0).getForeignKeys();</b>
+<i>69</i>&nbsp;
+<b class="fc"><i>70</i>&nbsp;        assertTrue(fks.containsAll(pks), &quot;Foreign keys should point to the primary keys&quot;);</b>
+<b class="fc"><i>71</i>&nbsp;    }</b>
+<i>72</i>&nbsp;    private void checkOneOne() {
+<b class="fc"><i>73</i>&nbsp;        Erd erd = new Erd();</b>
+<i>74</i>&nbsp;
+<b class="fc"><i>75</i>&nbsp;        Relationship r = new Relationship(erd);</b>
+<i>76</i>&nbsp;
+<b class="fc"><i>77</i>&nbsp;        Entity e1 = new Entity();</b>
+<b class="fc"><i>78</i>&nbsp;        e1.setName(&quot;Entita1&quot;);</b>
+<b class="fc"><i>79</i>&nbsp;        Entity e2 = new Entity();</b>
+<b class="fc"><i>80</i>&nbsp;        e2.setName(&quot;Entita2&quot;);</b>
+<i>81</i>&nbsp;
+<b class="fc"><i>82</i>&nbsp;        e1.addPrimaryKey(new PrimaryKey(&quot;Id_1&quot;, new TInteger()));</b>
+<i>83</i>&nbsp;
+<b class="fc"><i>84</i>&nbsp;        for(int i = 0; i &lt; 100; i++)</b>
+<b class="fc"><i>85</i>&nbsp;            e2.addPrimaryKey(new PrimaryKey(&quot;Id&quot;.concat(Integer.toString(i)), new TInteger()));</b>
+<i>86</i>&nbsp;
+<b class="fc"><i>87</i>&nbsp;        Cardinality c1 = new One();</b>
+<b class="fc"><i>88</i>&nbsp;        c1.setEntity(e1);</b>
+<b class="fc"><i>89</i>&nbsp;        r.addCardinality(c1);</b>
+<b class="fc"><i>90</i>&nbsp;        Cardinality c2 = new OnlyOne();</b>
+<b class="fc"><i>91</i>&nbsp;        c2.setEntity(e2);</b>
+<b class="fc"><i>92</i>&nbsp;        r.addCardinality(c2);</b>
+<b class="fc"><i>93</i>&nbsp;        r.checkCardinalities();</b>
+<b class="fc"><i>94</i>&nbsp;        assertEquals(true, e2.getForeignKeys().equals(e1.getPrimaryKeys()));</b>
+<b class="fc"><i>95</i>&nbsp;        assertEquals(true, e1.getForeignKeys().equals(e2.getPrimaryKeys()));</b>
+<b class="fc"><i>96</i>&nbsp;    }</b>
+<i>97</i>&nbsp;    private void checkOneMany() {
+<b class="fc"><i>98</i>&nbsp;        Erd erd = new Erd();</b>
+<i>99</i>&nbsp;
+<b class="fc"><i>100</i>&nbsp;        Relationship r = new Relationship(erd);</b>
+<i>101</i>&nbsp;
+<b class="fc"><i>102</i>&nbsp;        Entity e1 = new Entity();</b>
+<b class="fc"><i>103</i>&nbsp;        e1.setName(&quot;Entita1&quot;);</b>
+<b class="fc"><i>104</i>&nbsp;        Entity e2 = new Entity();</b>
+<b class="fc"><i>105</i>&nbsp;        e2.setName(&quot;Entita2&quot;);</b>
+<i>106</i>&nbsp;
+<b class="fc"><i>107</i>&nbsp;        e1.addPrimaryKey(new PrimaryKey(&quot;Id_1&quot;, new TInteger()));</b>
+<i>108</i>&nbsp;
+<b class="fc"><i>109</i>&nbsp;        for(int i = 0; i &lt; 100; i++)</b>
+<b class="fc"><i>110</i>&nbsp;            e2.addPrimaryKey(new PrimaryKey(&quot;Id&quot;.concat(Integer.toString(i)), new TInteger()));</b>
+<i>111</i>&nbsp;
+<b class="fc"><i>112</i>&nbsp;        Cardinality c1 = new One();</b>
+<b class="fc"><i>113</i>&nbsp;        c1.setEntity(e1);</b>
+<b class="fc"><i>114</i>&nbsp;        r.addCardinality(c1);</b>
+<b class="fc"><i>115</i>&nbsp;        Cardinality c2 = new Many();</b>
+<b class="fc"><i>116</i>&nbsp;        c2.setEntity(e2);</b>
+<b class="fc"><i>117</i>&nbsp;        r.addCardinality(c2);</b>
+<b class="fc"><i>118</i>&nbsp;        e2.addPrimaryKey(new PrimaryKey(&quot;ID&quot;, new TInteger()));</b>
+<b class="fc"><i>119</i>&nbsp;        r.checkCardinalities();</b>
+<i>120</i>&nbsp;
+<b class="fc"><i>121</i>&nbsp;        assertEquals(true, e1.getForeignKeys().equals(e2.getPrimaryKeys()));</b>
+<b class="fc"><i>122</i>&nbsp;        assertEquals(true, e2.getForeignKeys().size() == 0);</b>
+<b class="fc"><i>123</i>&nbsp;    }</b>
+<i>124</i>&nbsp;
+<i>125</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2017-10-05 14:18</div>
+</div>
+</body>
+</html>
