@@ -1,5 +1,7 @@
 package datatypes;
 
+import database.Database;
+
 public class TVarchar extends DataType implements Sizeable {
     private int size = 0;
     public TVarchar(){
@@ -19,6 +21,10 @@ public class TVarchar extends DataType implements Sizeable {
     @Override
     public int getSize() {
         return this.size;
+    }
+    @Override
+    public void accept(Database database) {
+
     }
 }
 

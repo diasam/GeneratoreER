@@ -1,5 +1,7 @@
 package datatypes;
 
+import database.Database;
+
 public class TText extends DataType{
     public TText(){
         super("Text");
@@ -8,5 +10,9 @@ public class TText extends DataType{
     @Override
     public String toString() {
         return null;
+    }
+    @Override
+    public void accept(Database database) {
+
     }
 }

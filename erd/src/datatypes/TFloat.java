@@ -1,5 +1,7 @@
 package datatypes;
 
+import database.Database;
+
 public class TFloat extends DataType implements Sizeable{
     private int size = 0;
     @Override
@@ -21,5 +23,9 @@ public class TFloat extends DataType implements Sizeable{
         return "TFloat{" +
                 "size=" + size +
                 '}';
+    }
+    @Override
+    public void accept(Database database) {
+
     }
 }

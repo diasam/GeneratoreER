@@ -1,11 +1,13 @@
 package relationships;
 
+import database.Database;
+import database.Visitable;
 import entites.Entity;
 
 import java.util.Observable;
 import java.util.Observer;
 
-public class Cardinality implements Observer{
+public abstract class Cardinality implements Observer, Visitable {
     private Entity entity;
     private Relationship relationship;
     private int min;
@@ -72,4 +74,7 @@ public class Cardinality implements Observer{
             relationship.checkCardinalities();
         }
     }
+
+    @Override
+    public abstract void accept(Database database);
 }

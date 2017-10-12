@@ -1,9 +1,12 @@
 package attributes;
+import database.Database;
+import database.Visitable;
 import datatypes.DataType;
+import datatypes.TInteger;
 
 import java.util.Observable;
 
-public abstract class Attribute {
+public abstract class Attribute implements Visitable {
     private String name;
     private DataType dataType;
 
@@ -33,4 +36,13 @@ public abstract class Attribute {
         return  "name='" + name + '\'' +
                 ", dataType=" + dataType;
     }
+
+    @Override
+    public abstract void accept(Database database);
+    public static void main(String[] args) {
+        Attribute pk = new PrimaryKey("abc", new TInteger());
+        System.out.println((ForeignKey) pk);
+    }
+
+
 }

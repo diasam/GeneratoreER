@@ -1,5 +1,7 @@
 package datatypes;
 
+import database.Database;
+
 public class TLongText extends DataType {
     public TLongText() {
         super("LongBlobText");
@@ -8,5 +10,9 @@ public class TLongText extends DataType {
     @Override
     public String toString() {
         return "TLongText{}";
+    }
+    @Override
+    public void accept(Database database) {
+
     }
 }

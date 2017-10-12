@@ -2,28 +2,29 @@ package entites;
 
 import attributes.Attribute;
 import attributes.ForeignKey;
-import attributes.PrimaryKey;
+import database.Database;
+import database.Visitable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
-public class Entity extends Observable implements Table{
+public class Entity extends Observable implements Table, Visitable{
     private String name;
     private final List<Attribute> normalAttributes;
     private final List<Attribute> primaryKeys; //TODO aggiornare uml
-    private final List<Attribute> foreignKeys; //TODO aggiornare uml
-
+    private final List<Table> dependencies;
     public Entity() {
         this("Undefined", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
 
-    public Entity(String name, List<Attribute> normalAttributes, List<Attribute> primaryKeys, List<Attribute> foreignKeys) {
+    public Entity(String name, List<Attribute> normalAttributes, List<Attribute> primaryKeys, List<Table> dependencies) {
         this.name = name;
         this.normalAttributes = normalAttributes;
         this.primaryKeys = primaryKeys;
-        this.foreignKeys = foreignKeys;
+        this.dependencies = dependencies;
     }
+    @Override
     public String getName() {
         return name;
     }
@@ -42,9 +43,12 @@ public class Entity extends Observable implements Table{
         changed();
     }
     @Override
-    public void addForeignKey(Attribute fk) {
-        foreignKeys.add(fk);
-        changed();
+    public void addDependency(Table table) {
+        if(!dependencies.contains(table)) {
+            dependencies.add(table);
+            //dependencies.forEach(normalAttributes::add);
+            changed();
+        }
     }
     @Override
     public List<Attribute> getNormalAttributes() {
@@ -56,15 +60,33 @@ public class Entity extends Observable implements Table{
     }
     @Override
     public List<Attribute> getForeignKeys() {
-        return foreignKeys;
+        List<Attribute> fks = new ArrayList<>();
+        //dependencies.forEach(x -> fks.addAll(x.getPrimaryKeys()));
+        dependencies.forEach((x) -> {
+            x.getPrimaryKeys().forEach(y -> fks.add(new ForeignKey(y, x)));
+        });
+        return fks;
+    }
+
+    public List<Table> getDependencies() {
+        return dependencies;
+    }
+    @Override
+    public void accept(Database database) {
+        database.generate(this);
     }
 
     private void changed() {
         setChanged();
         notifyObservers();
     }
-
-
-
+    public int compareTo(Table t) {
+        if(t.getDependencies().size() == 0)
+            return -1;
+        else if(dependencies.size() == 0)
+            return 1;
+        else
+            return 0;
+    }
 
 }

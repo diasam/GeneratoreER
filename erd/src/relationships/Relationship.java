@@ -1,30 +1,28 @@
 package relationships;
 
 import attributes.Attribute;
-import attributes.PrimaryKey;
-import datatypes.TInteger;
+import database.Database;
+import database.Visitable;
 import entites.Entity;
 import entites.Table;
 import model.Erd;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.*;
 
-public class Relationship {
+public class Relationship implements Visitable {
     private final Erd erd;
     private final List<Cardinality> links;
+    private final List<Attribute> attributes;
     private String name;
     private Table table;
     public Relationship(Erd erd) {
-        this(new ArrayList<>(), "Undefined", erd);
+        this(new ArrayList<>(), new ArrayList<>(), "Undefined", erd);
     }
-    public Relationship(List<Cardinality> links, String name, Erd erd) {
+    public Relationship(List<Cardinality> links, List<Attribute> attributes, String name, Erd erd) {
         this.links = links;
         this.name = name;
         this.erd = erd;
+        this.attributes = attributes;
     }
     public List<Cardinality> getLinks() {
         return links;
@@ -49,30 +47,44 @@ public class Relationship {
         Optional<Cardinality> many = links.stream()
                 .filter((x) -> x instanceof Many || x instanceof OneOrMore)
                 .findFirst();
-        if(one.isPresent() && many.isPresent()){
-            many.get().getEntity().getPrimaryKeys().stream()
-                    .forEach(one.get().getEntity()::addForeignKey);
+        if(one.isPresent() && many.isPresent()) {
+            one.get().getEntity().addDependency(many.get().getEntity());
         }
-    }
-    private void setCardinalityManyMany() {
-        List<Attribute> pks = new ArrayList<>();
-        links.stream().forEach((x) -> pks.addAll(x.getEntity().getPrimaryKeys()));
 
+    }
+    protected void createTable(Table t) {
         if(table != null) {
             erd.getRelationshipTables().remove(table);
         }
-        table = new Entity(getName(), null,pks, pks);
-        erd.addRelationshipTables(table);
+        erd.addRelationshipTables(t);
+        table = t;
+    }
+    private void setCardinalityManyMany() {
+        List<Attribute> pks = new ArrayList<>();
+        List<Table> dependencies = new ArrayList<>(links.size());
+        links.stream().forEach((x) -> {
+            pks.addAll(x.getEntity().getPrimaryKeys());
+            dependencies.add(x.getEntity());
+        } );
+        createTable( new Entity(getName(), attributes, pks, dependencies));
+
     }
     private void setCardinalityOneToOne() {
-        links.get(0).getEntity().getPrimaryKeys().stream()
-                .forEach(links.get(1).getEntity()::addForeignKey);
-        links.get(1).getEntity().getPrimaryKeys().stream()
-                .forEach(links.get(0).getEntity()::addForeignKey);
+        setOneToOneFk(links.get(0).getEntity());
+    }
+    public void setOneToOneFk(Table t){
+        Optional<Cardinality> e = links.stream()
+                .filter((x) -> !x.getEntity().equals(t))
+                .findFirst();
+        if(e.isPresent()) {
+            t.addDependency(e.get().getEntity());
+
+        }
 
     }
     public void addCardinality(Cardinality cardinality) {
         links.add(cardinality);
+        checkCardinalities();
     }
     public void removeCardinality(Cardinality cardinality) {
         links.remove(cardinality);
@@ -95,5 +107,10 @@ public class Relationship {
                 setCardinalityOneToOne();
             }
         }
+    }
+
+    @Override
+    public void accept(Database database) {
+        database.generate(this);
     }
 }

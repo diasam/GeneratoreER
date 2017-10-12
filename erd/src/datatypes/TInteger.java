@@ -1,5 +1,7 @@
 package datatypes;
 
+import database.Database;
+
 public class TInteger extends DataType implements Sizeable{
     private int size = 32;
     public TInteger() {
@@ -20,4 +22,9 @@ public class TInteger extends DataType implements Sizeable{
     public String toString() {
         return "Integer("+size+")";
     }
+    @Override
+    public void accept(Database database) {
+
+    }
 }
+
