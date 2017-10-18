@@ -13,6 +13,6 @@ public class TLongBlob extends DataType {
     }
     @Override
     public void accept(Database database) {
-
+        database.generate(this);
     }
 }

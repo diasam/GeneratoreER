@@ -24,7 +24,7 @@ public class TInteger extends DataType implements Sizeable{
     }
     @Override
     public void accept(Database database) {
-
+        database.generate(this);
     }
 }
 

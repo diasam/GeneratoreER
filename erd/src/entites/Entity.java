@@ -12,7 +12,7 @@ import java.util.Observable;
 public class Entity extends Observable implements Table, Visitable{
     private String name;
     private final List<Attribute> normalAttributes;
-    private final List<Attribute> primaryKeys; //TODO aggiornare uml
+    private final List<Attribute> primaryKeys;
     private final List<Table> dependencies;
     public Entity() {
         this("Undefined", new ArrayList<>(), new ArrayList<>(), new ArrayList<>());

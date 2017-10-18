@@ -3,9 +3,7 @@ package database;
 import attributes.ForeignKey;
 import attributes.NormalAttribute;
 import attributes.PrimaryKey;
-import datatypes.TDate;
-import datatypes.TFloat;
-import datatypes.TInteger;
+import datatypes.*;
 import entites.Entity;
 import entites.Table;
 import model.Erd;
@@ -67,14 +65,19 @@ public abstract class Database {
     public abstract void generate(NormalAttribute normalAttribute);
     public abstract void generate(PrimaryKey primaryKey);
     public abstract void generate(ForeignKey foreignKey);
-    public abstract void generate(Table table);
     public abstract void generate(Many many);
     public abstract void generate(One one);
     public abstract void generate(OneOrMore oneOrMore);
     public abstract void generate(OnlyOne onlyOne);
     public abstract void generate(Relationship relationship);
-    public abstract void generate(TFloat tFloat);
-    public abstract void generate(TInteger tInteger);
-    public abstract void generate(TDate tDate);
-
+    public abstract void generate(TFloat t);
+    public abstract void generate(TInteger t);
+    public abstract void generate(TDate t);
+    public abstract void generate(TBlob t);
+    public abstract void generate(TLongBlob t);
+    public abstract void generate(TLongText t);
+    public abstract void generate(TMediumBlob t);
+    public abstract void generate(TText t);
+    public abstract void generate(TTinyInt t);
+    public abstract void generate(TVarchar t);
 }

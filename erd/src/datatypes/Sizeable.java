@@ -1,6 +1,9 @@
 package datatypes;
 
-public interface Sizeable{
+import database.Database;
+import database.Visitable;
+
+public interface Sizeable {
     void setSize(int size);
     int getSize();
 }

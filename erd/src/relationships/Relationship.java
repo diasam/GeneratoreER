@@ -8,6 +8,8 @@ import entites.Table;
 import model.Erd;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Relationship implements Visitable {
     private final Erd erd;
@@ -49,7 +51,16 @@ public class Relationship implements Visitable {
                 .findFirst();
         if(one.isPresent() && many.isPresent()) {
             one.get().getEntity().addDependency(many.get().getEntity());
+            if(attributes.size() > 0) {
+                createTable(new Entity(getName(),
+                        attributes,
+                        one.get().getEntity().getPrimaryKeys(),
+                        links.stream()
+                                .map((x) -> x.getEntity())
+                                .collect(Collectors.toList())));
+            }
         }
+
 
     }
     protected void createTable(Table t) {
@@ -83,8 +94,11 @@ public class Relationship implements Visitable {
 
     }
     public void addCardinality(Cardinality cardinality) {
-        links.add(cardinality);
-        checkCardinalities();
+        Class c = cardinality.getClass();
+        if(links.size() < 2 || links.stream().allMatch((x) -> x.getClass().equals(c))) {
+            links.add(cardinality);
+            checkCardinalities();
+        }
     }
     public void removeCardinality(Cardinality cardinality) {
         links.remove(cardinality);
@@ -107,6 +121,18 @@ public class Relationship implements Visitable {
                 setCardinalityOneToOne();
             }
         }
+    }
+
+    public List<Attribute> getAttributes() {
+        return attributes;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public void setTable(Table table) {
+        this.table = table;
     }
 
     @Override

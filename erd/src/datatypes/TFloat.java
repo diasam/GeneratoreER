@@ -26,6 +26,6 @@ public class TFloat extends DataType implements Sizeable{
     }
     @Override
     public void accept(Database database) {
-
+        database.generate(this);
     }
 }

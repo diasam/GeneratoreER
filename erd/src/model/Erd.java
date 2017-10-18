@@ -1,5 +1,7 @@
 package model;
 
+import database.Database;
+import database.Visitable;
 import entites.Entity;
 import entites.Table;
 import relationships.Relationship;
@@ -8,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Erd {
+public class Erd implements Visitable {
     public String name;
     private final List<Table> entities;
     private final List<Relationship> relationships;
@@ -42,15 +44,24 @@ public class Erd {
 
     public void addEntity(Entity entity) {
         entities.add(entity);
-        /*Collections.sort(entities);
-        List<Table> dep = new ArrayList<>();
-        Collections.copy(dep, entities);*/
-
     }
     public void addRelationship(Relationship relationship) {
         relationships.add(relationship);
     }
     public void addRelationshipTables(Table table) {
         relationshipTables.add(table);
+    }
+
+    @Override
+    public void accept(Database database) {
+        database.generate(this);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
