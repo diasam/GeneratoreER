@@ -1,5 +1,5 @@
 package database;
 
 public interface Visitable {
-    void accept(Database database);
+    String accept(Database database);
 }

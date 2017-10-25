@@ -10,6 +10,8 @@ import model.Erd;
 import relationships.*;
 
 import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Sql extends Database {
     private boolean done = false;
@@ -18,96 +20,123 @@ public class Sql extends Database {
         super();
         tablesCreated = new HashMap<>();
     }
-
+    public static String concat(String a, String b) {
+        return a.concat("\n").concat(b);
+    }
     @Override
-    public void generate(NormalAttribute normalAttribute) {
-        append(normalAttribute.getName().concat(" "));
-        normalAttribute.getDataType().accept(this);
+    public String getScript(Erd erd) {
+        erd.getEntities().stream().forEach((x) -> {
+            removeLast(x);
+            newLine(x);
+            append(x, ");");
+        });
+        return script.get(erd)
+            .concat(erd.getEntities().stream()
+                .map((x) -> script.get(x))
+                .reduce("", Sql::concat))
+            .concat(erd.getRelationshipTables().stream()
+                .map((x) -> script.get(x))
+                .reduce("", Sql::concat));
+    }
+    @Override
+    public String generate(NormalAttribute normalAttribute) {
+        return normalAttribute.getName().concat(" ")
+                .concat(normalAttribute.getDataType().accept(this));
+
     }
 
     @Override
-    public void generate(PrimaryKey primaryKey) {
-        append(primaryKey.getName().concat(" "));
-        primaryKey.getDataType().accept(this);
-        append(", ");
-        newLine();
-        append("PRIMARY KEY("
+    public String generate(PrimaryKey primaryKey) {
+        return ""
+                .concat(primaryKey.getName().concat(" "))
+                .concat(primaryKey.getDataType().accept(this))
+                .concat(", PRIMARY KEY("
                 .concat(primaryKey.getName()
                 .concat(")")));
     }
 
     @Override
-    public void generate(ForeignKey foreignKey) {
-        append(foreignKey.getName().concat(" "));
-        foreignKey.getDataType().accept(this);
-        append(", ");
-        newLine();
-        append("FOREIGN KEY ("
+    public String generate(ForeignKey foreignKey) {
+        return foreignKey.getName().concat(" ")
+                .concat(foreignKey.getDataType().accept(this))
+                .concat(", ")
+                .concat("FOREIGN KEY (")
                 .concat(foreignKey.getName())
                 .concat(") REFERENCES ")
                 .concat(foreignKey.getReference().getName())
                 .concat("(")
                 .concat(foreignKey.getName()
-                .concat(")")));
+                .concat(")"));
+        /*
+        append(foreignKey, foreignKey.getName().concat(" "));
+        foreignKey.getDataType().accept(this);
+        append(foreignKey, ", ");
+        newLine(foreignKey);
+        append(foreignKey, "FOREIGN KEY ("
+                .concat(foreignKey.getName())
+                .concat(") REFERENCES ")
+                .concat(foreignKey.getReference().getName())
+                .concat("(")
+                .concat(foreignKey.getName()
+                .concat(")")));*/
     }
     @Override
-    public void generate(Erd erd) {
-        append("create database if not exists ");
-        append(erd.getName().concat(";"));
-        newLine();
-        append("use database ". concat(erd.getName()).concat(";"));
-        newLine();
+    public String generate(Erd erd) {
+
+        append(erd,"create database if not exists ");
+        append(erd, erd.getName().concat(";"));
+        newLine(erd);
+        append(erd, "use database ". concat(erd.getName()).concat(";"));
+        newLine(erd);
+        erd.getEntities().stream().filter((x) -> x.getDependencies().size() == 0)
+                .forEach((x) -> {
+                    x.accept(this);
+                    //endInstruction();
+                });
         erd.getRelationships().stream()
                 .forEach((x) -> x.accept(this));
         erd.getRelationshipTables().stream()
                 .forEach((x) -> x.accept(this));
-        erd.getEntities().stream()
-                .forEach((x) -> x.accept(this));
-
-
+        return "";
     }
     @Override
-    public void generate(Entity entity) {
+    public String generate(Entity entity) {
         if(!tablesCreated.containsKey(entity)) {
             tablesCreated.put(entity, true);
-            entity.getDependencies().stream().forEach((x) -> x.accept(this));
             done = false;
-            append("create table ".concat(entity.getName()).concat(" ("));
-            addIndentation();
-            indent();
-            newLine();
+            append(entity, "create table ".concat(entity.getName()).concat(" ("));
+            addIndentation(entity);
+            indent(entity);
+            newLine(entity);
             entity.getNormalAttributes().stream().forEach((x) -> {
-                x.accept(this);
-                append(",");
+                append(entity, x.accept(this).concat(","));
                 done = true;
 
             });
             if (done) {
-                newLine();
+                newLine(entity);
                 done = false;
             }
             entity.getPrimaryKeys().stream().forEach((x) -> {
-                x.accept(this);
-                append(",");
+                append(entity, x.accept(this).concat(","));
                 done = true;
             });
             if (done) {
-                newLine();
+                newLine(entity);
                 done = false;
             }
             entity.getForeignKeys().stream().forEach((x) -> {
-                x.accept(this);
-                append(",");
+                append(entity, x.accept(this).concat(","));
                 done = true;
             });
             if (done) {
-                subIndentation();
-                newLine();
+                subIndentation(entity);
+                newLine(entity);
                 done = false;
             }
-            subIndentation();
+            subIndentation(entity);
         }
-
+        return script.get(entity);
     }
     public static void main(String[] args) {
         Erd erd = new Erd("Db");
@@ -129,121 +158,152 @@ public class Sql extends Database {
         e1.addPrimaryKey(new PrimaryKey("PrimaryKey", new TInteger()));
         r.addCardinality(c1);
         r.addCardinality(c2);
+
+
+        Entity e3 = new Entity();
+        e3.setName("Entity3");
+
+        e3.addPrimaryKey(new PrimaryKey("PrimaryKeyProva", new TInteger()));
+        Entity e4 = new Entity();
+        e4.setName("Entity4");
+        e4.addPrimaryKey(new PrimaryKey("PrimaryKeyProva", new TInteger()));
+        Relationship r2 = new Relationship(erd);
+        erd.addEntity(e3);
+        erd.addEntity(e4);
+        erd.addRelationship(r2);
+        Cardinality c3 = new OnlyOne();
+        Cardinality c4 = new Many();
+
+        c3.setEntity(e2);
+        c4.setEntity(e3);
+        r2.addCardinality(c3);
+        r2.addCardinality(c4);
+        Entity e5 = new Entity();
+        e5.setName("no_dep");
+        erd.addEntity(e5);
+
+
         d.generate(erd);
-        System.out.println(d.getScript());
-        System.out.println(e1.getClass());
+        System.out.println(d.getScript(erd));
+
     }
 
     @Override
-    public void generate(Many many) {
+    public String generate(Many many) {
         many.getEntity().accept(this);
-        endInstruction();
+        return "";
+
     }
 
     @Override
-    public void generate(One one) {
+    public String generate(One one) {
         one.getEntity().accept(this);
-        endInstruction();
-
+        return "";
     }
 
-    protected void endInstruction() {
-        removeLast();
-        subIndentation();
-        newLine();
-        append(");");
-        newLine();
+    protected void endInstruction(Visitable visitable) {
+        removeLast(visitable);
+        subIndentation(visitable);
+        newLine(visitable);
+        append(visitable,");");
+        newLine(visitable);
     }
 
     @Override
-    public void generate(OneOrMore oneOrMore) {
+    public String generate(OneOrMore oneOrMore) {
         oneOrMore.getEntity().accept(this);
-        endInstruction();
+        return "";
     }
 
     @Override
-    public void generate(OnlyOne onlyOne) {
+    public String generate(OnlyOne onlyOne) {
         onlyOne.getEntity().accept(this);
+        Entity e = onlyOne.getEntity();
+        addIndentation(e);
+        indent(e);
         onlyOne.getEntity().getForeignKeys().stream()
                 .forEach((x) -> {
-                    addIndentation();
-                    indent();
-                    append("constraint check ");
-                    append("(");
-                    append(x.getName());
-                    append(" is not null");
-                    append("),");
-                    newLine();
+                    addIndentation(e);
+                    indent(e);
+                    append(e,"constraint check ");
+                    append(e,"(");
+                    append(e,x.getName());
+                    append(e," is not null");
+                    append(e,"),");
+                    newLine(e);
                 });
-        endInstruction();
+        subIndentation(e);
+        return "";
     }
 
     @Override
-    public void generate(Relationship relationship) {
+    public String generate(Relationship relationship) {
         relationship.getLinks().stream()
                 .filter((x) -> x instanceof Many || x instanceof OneOrMore)
                 .forEach((x) -> x.accept(this));
         relationship.getLinks().stream()
                 .filter((x) -> x instanceof One || x instanceof OnlyOne)
                 .forEach((x) -> x.accept(this));
+        return "";
     }
 
     @Override
-    public void generate(TFloat t) {
-        append(t.getName());
-        append("(");
-        append(Integer.toString(t.getSize()));
-        append(")");
+    public String generate(TFloat t) {
+        return t.getName()
+                .concat("(")
+                .concat(Integer.toString(t.getSize()))
+                .concat(")");
     }
 
     @Override
-    public void generate(TInteger t) {
-        append(t.getName());
-        append("(");
-        append(Integer.toString(t.getSize()));
-        append(")");
+    public String generate(TInteger t) {
+        return t.getName()
+                .concat("(")
+                .concat(Integer.toString(t.getSize()))
+                .concat(")");
     }
 
     @Override
-    public void generate(TDate t) {
-        append(t.getName());
+    public String generate(TDate t) {
+        return t.getName();
     }
 
     @Override
-    public void generate(TBlob t) {
-        append(t.getName());
+    public String generate(TBlob t) {
+        return t.getName();
     }
 
     @Override
-    public void generate(TLongBlob t) {
-        append(t.getName());
+    public String generate(TLongBlob t) {
+        return t.getName();
     }
 
     @Override
-    public void generate(TLongText t) {
-        append(t.getName());
+    public String generate( TLongText t) {
+        return t.getName();
     }
 
     @Override
-    public void generate(TMediumBlob t) {
-        append(t.getName());
+    public String generate(TMediumBlob t) {
+        return t.getName();
     }
 
     @Override
-    public void generate(TText t) {
-        append(t.getName());
+    public String generate(TText t) {
+        return t.getName();
     }
 
     @Override
-    public void generate(TTinyInt t) {
-        append(t.getName());
+    public String generate(TTinyInt t) {
+        return t.getName();
     }
 
     @Override
-    public void generate(TVarchar t) {
-        append(t.getName());
-        append("(");
-        append(Integer.toString(t.getSize()));
-        append(")");
+    public String generate(TVarchar t) {
+        return t.getName()
+                .concat("(")
+                .concat(Integer.toString(t.getSize()))
+                .concat(")");
     }
+
 }

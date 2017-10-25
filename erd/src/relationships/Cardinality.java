@@ -76,5 +76,5 @@ public abstract class Cardinality implements Observer, Visitable {
     }
 
     @Override
-    public abstract void accept(Database database);
+    public abstract String accept(Database database);
 }

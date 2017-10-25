@@ -72,8 +72,8 @@ public class Entity extends Observable implements Table, Visitable{
         return dependencies;
     }
     @Override
-    public void accept(Database database) {
-        database.generate(this);
+    public String accept(Database database) {
+        return database.generate(this);
     }
 
     private void changed() {

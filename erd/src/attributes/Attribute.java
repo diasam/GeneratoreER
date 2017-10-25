@@ -38,7 +38,7 @@ public abstract class Attribute implements Visitable {
     }
 
     @Override
-    public abstract void accept(Database database);
+    public abstract String accept(Database database);
     public static void main(String[] args) {
         Attribute pk = new PrimaryKey("abc", new TInteger());
         System.out.println((ForeignKey) pk);

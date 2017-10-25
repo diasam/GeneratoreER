@@ -30,6 +30,16 @@ public class Erd implements Visitable {
     }
 
     public List<Table> getEntities() {
+        //Collections.sort(entities);
+        Table e;
+        for(int i = 0; i < entities.size(); i++) {
+            e = entities.get(i);
+            for(int j = i + 1; j < entities.size(); j++) {
+                if(e.getDependencies().contains(entities.get(j))) {
+                    Collections.swap(entities, i, j);
+                }
+            }
+        }
         return entities;
     }
 
@@ -53,8 +63,8 @@ public class Erd implements Visitable {
     }
 
     @Override
-    public void accept(Database database) {
-        database.generate(this);
+    public String accept(Database database) {
+        return database.generate(this);
     }
 
     public String getName() {

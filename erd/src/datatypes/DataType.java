@@ -17,5 +17,5 @@ public abstract class DataType implements Visitable{
     }
 
     @Override
-    public abstract void accept(Database database);
+    public abstract String accept(Database database);
 }

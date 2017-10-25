@@ -12,7 +12,7 @@ public class TText extends DataType{
         return null;
     }
     @Override
-    public void accept(Database database) {
-        database.generate(this);
+    public String accept(Database database) {
+        return database.generate(this);
     }
 }

@@ -3,81 +3,105 @@ package database;
 import attributes.ForeignKey;
 import attributes.NormalAttribute;
 import attributes.PrimaryKey;
+import com.sun.tools.javac.code.Attribute;
 import datatypes.*;
 import entites.Entity;
 import entites.Table;
 import model.Erd;
 import relationships.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public abstract class Database {
-    private String script;
-    private int indentation;
+    protected String scriptString;
+    protected final HashMap<Visitable, String> script;
+    protected final HashMap<Visitable, Integer> indentation;
+    protected int indentationString;
+
     public Database() {
-        this("", 0);
+        this("", 0, new HashMap<>(), new HashMap<>());
     }
 
-    public Database(String script, int indentation) {
+    public Database(String scriptString, int indentationString, HashMap<Visitable, String> script, HashMap<Visitable, Integer> indentation) {
+        this.scriptString = scriptString;
+        this.indentationString = indentationString;
         this.script = script;
         this.indentation = indentation;
     }
-    protected void addIndentation() {
-        indentation++;
+    protected void append(Visitable visitable, String s) {
+        /*if(!script.containsKey(visitable)) {
+            script.put(visitable, "");
+        }*/
+        script.put(visitable, script.getOrDefault(visitable, "").concat(s));
     }
-    protected void subIndentation() {
-        if(indentation > 0)
-        indentation--;
+    protected void addIndentation(Visitable visitable) {
+        indentation(visitable, 1);
     }
-    protected void indent() {
-        for(int i = 0; i < indentation; i++)
-            append("\t");
+    protected void subIndentation(Visitable visitable) {
+        indentation(visitable, -1);
     }
-    protected void resetIndentation() {
-        indentation = 0;
+    protected void indentation(Visitable visitable, int i) {
+        indentation.put(visitable, (indentation.getOrDefault(visitable, 0) + i));
     }
-    protected void newLine() {
-        append("\n");
-        indent();
-
-    }
-    protected void removeLast() {
-        if(script.length() > 1) {
-            while (script.charAt(script.length()-1) == '\n' || script.charAt(script.length()-1) == '\t' || script.length() <= 1) {
-                script = script.substring(0, script.length()-1);
-            }
-            script = script.substring(0, script.length()-1);
-
+    protected void indent(Visitable visitable) {
+        if(indentation.containsKey(visitable)) {
+            for (int i = 0; i < indentation.get(visitable); i++)
+                append(visitable, "\t");
         }
+    }
+    protected void resetIndentation(Visitable visitable) {
+        indentation.put(visitable, 0);
+    }
+    protected void newLine(Visitable visitable) {
+        append(visitable, "\n");
+        indent(visitable);
 
     }
-    public String getScript() {
-        return script;
+    protected void removeLast(Visitable visitable) {
+        String s = "";
+        if(script.containsKey(visitable)) {
+            s = script.get(visitable);
+        }
+        boolean flag = true;
+        if(s.length() > 1) {
+            while (flag && s.length() > 1 && (s.charAt(s.length() - 1) == '\n' || s.charAt(s.length() - 1) == '\t')) {
+                s = s.substring(0, s.length() - 1);
+            }
+            if (s.charAt(s.length() - 1) != '(')
+                s = s.substring(0, s.length() - 1);
+        }
+        script.put(visitable, s);
+
     }
+    public abstract String getScript(Erd erd);
+
 
     public void setScript(String script) {
-        this.script = script;
+        this.scriptString = script;
     }
-    protected void append(String s) {
-        //script = script.concat(s.concat(";\n"));
-        script = script.concat(s);
-    }
-    public abstract void generate(Erd erd);
-    public abstract void generate(Entity entity);
-    public abstract void generate(NormalAttribute normalAttribute);
-    public abstract void generate(PrimaryKey primaryKey);
-    public abstract void generate(ForeignKey foreignKey);
-    public abstract void generate(Many many);
-    public abstract void generate(One one);
-    public abstract void generate(OneOrMore oneOrMore);
-    public abstract void generate(OnlyOne onlyOne);
-    public abstract void generate(Relationship relationship);
-    public abstract void generate(TFloat t);
-    public abstract void generate(TInteger t);
-    public abstract void generate(TDate t);
-    public abstract void generate(TBlob t);
-    public abstract void generate(TLongBlob t);
-    public abstract void generate(TLongText t);
-    public abstract void generate(TMediumBlob t);
-    public abstract void generate(TText t);
-    public abstract void generate(TTinyInt t);
-    public abstract void generate(TVarchar t);
+
+    public abstract String generate(Erd erd);
+    public abstract String generate(Entity entity);
+    public abstract String generate(NormalAttribute normalAttribute);
+    public abstract String generate(PrimaryKey primaryKey);
+    public abstract String generate(ForeignKey foreignKey);
+    public abstract String generate(Many many);
+    public abstract String generate(One one);
+    public abstract String generate(OneOrMore oneOrMore);
+    public abstract String generate(OnlyOne onlyOne);
+    public abstract String generate(Relationship relationship);
+    public abstract String generate(TFloat t);
+    public abstract String generate(TInteger t);
+    public abstract String generate(TDate t);
+    public abstract String generate(TBlob t);
+    public abstract String generate(TLongBlob t);
+    public abstract String generate(TLongText t);
+    public abstract String generate(TMediumBlob t);
+    public abstract String generate(TText t);
+    public abstract String generate(TTinyInt t);
+    public abstract String generate(TVarchar t);
 }

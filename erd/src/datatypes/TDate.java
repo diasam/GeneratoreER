@@ -12,7 +12,7 @@ public class TDate extends DataType{
         super("Date");
     }
     @Override
-    public void accept(Database database) {
-        database.generate(this);
+    public String accept(Database database) {
+        return database.generate(this);
     }
 }
