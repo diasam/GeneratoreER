@@ -10,7 +10,7 @@ public abstract class DataType implements Visitable{
     }
 
     @Override
-    public abstract String toString();//TODO Finire di implementare nelle sottoclassi il metodo toString
+    public abstract String toString();
 
     public String getName() {
         return name;

@@ -1,5 +1,6 @@
 package database;
 
+import attributes.Attribute;
 import attributes.ForeignKey;
 import attributes.NormalAttribute;
 import attributes.PrimaryKey;
@@ -25,7 +26,7 @@ public class Sql extends Database {
     }
     @Override
     public String getScript(Erd erd) {
-        erd.getEntities().stream().forEach((x) -> {
+        Stream.concat(erd.getEntities().stream(), erd.getRelationshipTables().stream()).forEach((x) -> {
             removeLast(x);
             newLine(x);
             append(x, ");");
@@ -86,12 +87,11 @@ public class Sql extends Database {
         append(erd,"create database if not exists ");
         append(erd, erd.getName().concat(";"));
         newLine(erd);
-        append(erd, "use database ". concat(erd.getName()).concat(";"));
+        append(erd, "use ". concat(erd.getName()).concat(";"));
         newLine(erd);
         erd.getEntities().stream().filter((x) -> x.getDependencies().size() == 0)
                 .forEach((x) -> {
                     x.accept(this);
-                    //endInstruction();
                 });
         erd.getRelationships().stream()
                 .forEach((x) -> x.accept(this));
@@ -139,15 +139,20 @@ public class Sql extends Database {
         return script.get(entity);
     }
     public static void main(String[] args) {
+        // ER Diagram
         Erd erd = new Erd("Db");
         Database d = new Sql();
+        // Due entita
         Entity e1 = new Entity();
         Entity e2 = new Entity();
+
         erd.addEntity(e1);
         erd.addEntity(e2);
+
         Relationship r = new Relationship(erd);
         erd.addRelationship(r);
-        Cardinality c1 = new OnlyOne();
+
+        Cardinality c1 = new Many();
         Cardinality c2 = new Many();
         c1.setEntity(e1);
         c2.setEntity(e2);
@@ -158,7 +163,6 @@ public class Sql extends Database {
         e1.addPrimaryKey(new PrimaryKey("PrimaryKey", new TInteger()));
         r.addCardinality(c1);
         r.addCardinality(c2);
-
 
         Entity e3 = new Entity();
         e3.setName("Entity3");
@@ -181,11 +185,9 @@ public class Sql extends Database {
         Entity e5 = new Entity();
         e5.setName("no_dep");
         erd.addEntity(e5);
-
-
+        e5.addNormalAttribute(new NormalAttribute("Prova", new TInteger()));
         d.generate(erd);
         System.out.println(d.getScript(erd));
-
     }
 
     @Override

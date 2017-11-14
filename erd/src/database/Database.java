@@ -17,25 +17,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class Database {
-    protected String scriptString;
     protected final HashMap<Visitable, String> script;
     protected final HashMap<Visitable, Integer> indentation;
     protected int indentationString;
 
     public Database() {
-        this("", 0, new HashMap<>(), new HashMap<>());
+        this(0, new HashMap<>(), new HashMap<>());
     }
 
-    public Database(String scriptString, int indentationString, HashMap<Visitable, String> script, HashMap<Visitable, Integer> indentation) {
-        this.scriptString = scriptString;
+    public Database(int indentationString, HashMap<Visitable, String> script, HashMap<Visitable, Integer> indentation) {
         this.indentationString = indentationString;
         this.script = script;
         this.indentation = indentation;
     }
     protected void append(Visitable visitable, String s) {
-        /*if(!script.containsKey(visitable)) {
-            script.put(visitable, "");
-        }*/
         script.put(visitable, script.getOrDefault(visitable, "").concat(s));
     }
     protected void addIndentation(Visitable visitable) {
@@ -78,11 +73,6 @@ public abstract class Database {
 
     }
     public abstract String getScript(Erd erd);
-
-
-    public void setScript(String script) {
-        this.scriptString = script;
-    }
 
     public abstract String generate(Erd erd);
     public abstract String generate(Entity entity);

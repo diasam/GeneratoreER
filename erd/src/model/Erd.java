@@ -30,7 +30,10 @@ public class Erd implements Visitable {
     }
 
     public List<Table> getEntities() {
-        //Collections.sort(entities);
+        orderEntities();
+        return entities;
+    }
+    private void orderEntities() {
         Table e;
         for(int i = 0; i < entities.size(); i++) {
             e = entities.get(i);
@@ -40,7 +43,7 @@ public class Erd implements Visitable {
                 }
             }
         }
-        return entities;
+
     }
 
     public List<Relationship> getRelationships() {
