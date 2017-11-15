@@ -1,11 +1,13 @@
 package view;
 
 import attributes.PrimaryKey;
+import javafx.scene.Group;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 
 public class PrimaryKeyER extends AttributeER {
-    public PrimaryKeyER(Pane pane, Pane entityPane, PrimaryKey attribute) {
-        super(pane, entityPane, attribute);
+    public PrimaryKeyER(Pane root, Group entityGroup, PrimaryKey attribute) {
+        super(root, entityGroup, attribute);
     }
 
     @Override

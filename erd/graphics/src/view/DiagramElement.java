@@ -1,23 +1,74 @@
 package view;
 
+import javafx.scene.Group;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.stage.Stage;
+import model.Erd;
 
 public abstract class DiagramElement {
-    protected Pane pane;
-    protected Shape background;
+    protected static Erd erd;
+    protected Group group;
     protected static final double W = 250, H = 250;
-    protected static Pane root;
-    public DiagramElement(Pane pane, Pane root) {
-        this.pane = pane;
-        pane.setPrefSize(W,H);
-        pane.resize(W,H);
+    protected Pane root;
+    protected static Stage stage;
+
+    public DiagramElement() {
+    }
+
+    public DiagramElement(Pane root, Group group, Erd erd) {
+        this.group = group;
+        this.root = root;
+        this.erd = erd;
+    }
+    public DiagramElement(Pane root, Group group) {
+        this.group = group;
+        this.root = root;
+    }
+    public DiagramElement(Pane root, Erd erd) {
+        this(root, new Group(), erd);
+    }
+    public DiagramElement(Pane root) {this(root, new Group()); }
+
+    public static Erd getErd() {
+        return erd;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public static double getW() {
+        return W;
+    }
+
+    public static double getH() {
+        return H;
+    }
+
+    public Pane getRoot() {
+        return root;
+    }
+
+    public static void setErd(Erd erd) {
+        DiagramElement.erd = erd;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
+    public void setRoot(Pane root) {
         this.root = root;
     }
 
-    public DiagramElement(Pane pane) {
-        this.pane = pane;
+    public static Stage getStage() {
+        return stage;
+    }
+
+    public static void setStage(Stage stage) {
+        DiagramElement.stage = stage;
     }
 
     public abstract void drawPane();
