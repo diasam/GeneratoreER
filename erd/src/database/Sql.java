@@ -32,12 +32,12 @@ public class Sql extends Database {
             append(x, ");");
         });
         return script.get(erd)
-            .concat(erd.getEntities().stream()
-                .map((x) -> script.get(x))
-                .reduce("", Sql::concat))
-            .concat(erd.getRelationshipTables().stream()
-                .map((x) -> script.get(x))
-                .reduce("", Sql::concat));
+                .concat(erd.getEntities().stream()
+                        .map((x) -> script.get(x))
+                        .reduce("", Sql::concat))
+                .concat(erd.getRelationshipTables().stream()
+                        .map((x) -> script.get(x))
+                        .reduce("", Sql::concat));
     }
     @Override
     public String generate(NormalAttribute normalAttribute) {

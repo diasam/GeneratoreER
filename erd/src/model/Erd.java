@@ -55,7 +55,7 @@ public class Erd implements Visitable {
         return relationshipTables;
     }
 
-    public void addEntity(Entity entity) {
+    public void addEntity(Table entity) {
         entities.add(entity);
     }
     public void addRelationship(Relationship relationship) {

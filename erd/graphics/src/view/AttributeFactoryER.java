@@ -1,5 +1,6 @@
 package view;
 
+import attributes.Attribute;
 import attributes.NormalAttribute;
 import attributes.PrimaryKey;
 import javafx.scene.Group;
@@ -8,11 +9,17 @@ import org.jetbrains.annotations.NotNull;
 
 import javafx.scene.shape.Rectangle;
 
+import java.util.ArrayList;
+
 public class AttributeFactoryER {
-    public static AttributeER create(Pane root, Group entityGroup, NormalAttribute attribute) {
-        return new NormalAttributeER(root, entityGroup, attribute);
+    private final ArrayList<AttributeER> attributes = new ArrayList<>();
+    public void create(Pane root, Group entityGroup, NormalAttribute attribute) {
+        attributes.add(new NormalAttributeER(root, entityGroup, attribute));
     }
-    public static  AttributeER create(Pane root, Group entityGroup, PrimaryKey attribute) {
-        return new PrimaryKeyER(root, entityGroup, attribute);
+    public void create(Pane root, Group entityGroup, PrimaryKey attribute) {
+        attributes.add(new PrimaryKeyER(root, entityGroup, attribute));
+    }
+    public ArrayList<AttributeER> getAttributes() {
+        return attributes;
     }
 }

@@ -7,13 +7,15 @@ import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import model.Erd;
 
+import java.util.ArrayList;
+
 public abstract class DiagramElement {
     protected static Erd erd;
     protected Group group;
     protected static final double W = 250, H = 250;
     protected Pane root;
     protected static Stage stage;
-
+    protected final ArrayList<DiagramElement> children = new ArrayList<>();
     public DiagramElement() {
     }
 
@@ -27,9 +29,13 @@ public abstract class DiagramElement {
         this.root = root;
     }
     public DiagramElement(Pane root, Erd erd) {
-        this(root, new Group(), erd);
+        this(root
+                , new Group()
+                , erd);
     }
-    public DiagramElement(Pane root) {this(root, new Group()); }
+    public DiagramElement(Pane root) {
+        this(root
+                , new Group()); }
 
     public static Erd getErd() {
         return erd;
@@ -72,4 +78,5 @@ public abstract class DiagramElement {
     }
 
     public abstract void drawPane();
+    protected abstract void deleteChildrens();
 }

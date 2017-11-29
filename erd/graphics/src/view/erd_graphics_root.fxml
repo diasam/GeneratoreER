@@ -7,7 +7,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="814.0" prefWidth="1061.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ErdGraphics">
+<AnchorPane prefHeight="814.0" prefWidth="1061.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.GraphicsRootController">
    <children>
       <BorderPane prefHeight="815.0" prefWidth="1061.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <top>
@@ -18,7 +18,7 @@
                         <MenuItem mnemonicParsing="false" text="Open" />
                         <MenuItem mnemonicParsing="false" text="Save" />
                         <MenuItem mnemonicParsing="false" text="Save as" />
-                        <MenuItem mnemonicParsing="false" text="Export" />
+                        <MenuItem mnemonicParsing="false" onAction="#export" text="Export image" />
                         <MenuItem mnemonicParsing="false" text="Print" />
                     <MenuItem mnemonicParsing="false" text="Exit" />
                   </items>
@@ -62,7 +62,7 @@
                            <children>
                               <ScrollPane prefHeight="727.0" prefWidth="850.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <content>
-                                    <Pane id="er-pane" prefHeight="860.0" prefWidth="1025.0" />
+                                    <Pane id="erPane" fx:id="erPane" prefHeight="860.0" prefWidth="1025.0" />
                                  </content></ScrollPane>
                            </children>
                         </AnchorPane>
@@ -103,6 +103,11 @@
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
+                                 <children>
+                                    <Button mnemonicParsing="false" prefHeight="132.0" prefWidth="110.0" text="Entity" />
+                                    <Button mnemonicParsing="false" prefHeight="132.0" prefWidth="110.0" text="Attribute" GridPane.columnIndex="1" />
+                                    <Button mnemonicParsing="false" prefHeight="132.0" prefWidth="110.0" text="Relationship" GridPane.rowIndex="1" />
+                                 </children>
                               </GridPane>
                            </children></AnchorPane>
                   </content>

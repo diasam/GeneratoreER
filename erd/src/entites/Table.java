@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface Table extends Comparable<Table>, Visitable {
     public String getName();
+    public void setName(String name);
     public List<Attribute> getNormalAttributes();
     public List<Attribute> getPrimaryKeys();
     public List<Attribute> getForeignKeys();

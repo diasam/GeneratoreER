@@ -11,8 +11,4 @@ public class NormalAttributeER extends AttributeER {
         super(root, entityGroup, attribute);
     }
 
-    @Override
-    public void accept(AttributeFactoryER attributeFactoryER) {
-
-    }
 }

@@ -52,12 +52,12 @@ public class Relationship implements Visitable {
         if(one.isPresent() && many.isPresent()) {
             one.get().getEntity().addDependency(many.get().getEntity());
             if(attributes.size() > 0) {
-                createTable(new Entity(getName(),
-                        attributes,
-                        one.get().getEntity().getPrimaryKeys(),
-                        links.stream()
-                                .map((x) -> x.getEntity())
-                                .collect(Collectors.toList())));
+                createTable(new Entity(getName()
+                        , attributes
+                        , one.get().getEntity().getPrimaryKeys()
+                        , links.stream()
+                                    .map((x) -> x.getEntity())
+                                    .collect(Collectors.toList())));
             }
         }
 
@@ -74,8 +74,15 @@ public class Relationship implements Visitable {
         List<Attribute> pks = new ArrayList<>();
         List<Table> dependencies = new ArrayList<>(links.size());
         links.stream().forEach((x) -> {
-            pks.addAll(x.getEntity().getPrimaryKeys());
-            dependencies.add(x.getEntity());
+            //List<Attribute> xPks = x.getEntity().getPrimaryKeys();
+            //if(xPks != null)
+            System.out.println(x.getEntity());
+            if(x.getEntity() != null ) {
+                pks.addAll(x.getEntity().getPrimaryKeys() );
+                dependencies.add(
+                        x.getEntity());
+            }
+
         } );
         createTable( new Entity(getName(), attributes, pks, dependencies));
 

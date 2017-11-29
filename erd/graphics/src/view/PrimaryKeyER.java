@@ -16,8 +16,4 @@ public class PrimaryKeyER extends AttributeER {
         label.setUnderline(true);
     }
 
-    @Override
-    public void accept(AttributeFactoryER attributeFactoryER) {
-
-    }
 }

@@ -23,11 +23,13 @@ public class Entity extends Observable implements Table, Visitable{
         this.normalAttributes = normalAttributes;
         this.primaryKeys = primaryKeys;
         this.dependencies = dependencies;
+        System.out.println(getPrimaryKeys());
     }
     @Override
     public String getName() {
         return name;
     }
+    @Override
     public void setName(String name) {
         this.name = name;
     }
