@@ -24,8 +24,8 @@ public class EntityER extends DiagramElement {
     protected final ArrayList<AttributeER> attributesEr = attributesFactory.getAttributes();
     protected Entity entity;
     protected Rectangle entityRect;
-    protected ContextMenu contextMenu;
     protected Label entityName;
+    protected ContextMenu contextMenu;
     protected Menu attributes;
     protected MenuItem pk;
     protected MenuItem att;

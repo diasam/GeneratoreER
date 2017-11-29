@@ -1,14 +1,19 @@
 package view;
 
+import attributes.NormalAttribute;
+import attributes.PrimaryKey;
+import datatypes.TInteger;
+import javafx.event.ActionEvent;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import model.Erd;
-import relationships.Cardinality;
-import relationships.Many;
+import relationships.*;
+
+import java.util.Optional;
 
 public class CardinalityER extends DiagramElement {
     protected Cardinality cardinality;
@@ -19,34 +24,29 @@ public class CardinalityER extends DiagramElement {
     protected Label c2;
     protected Rectangle clickableArea;
 
+    protected ContextMenu contextMenu;
+    protected MenuItem many;
+    protected MenuItem one;
+    protected MenuItem oneOrMore;
+    protected MenuItem onlyOne;
+
+    private static final double LINE_THICKNESS = 5.0f;
     public CardinalityER(Pane root, Group group, Cardinality cardinality) {
         super(root, group);
         this.cardinality = cardinality;
         initializeCardinality();
+        initializeMenu();
         //drawPane();
     }
 
     public CardinalityER(Pane root, Erd erd) {
         this(root, new Group(), new Many());
-        /*new Thread(() -> {
-            while(true) {
-                try {
-                    Thread.sleep(1000);
-                    if(entity != null) {
-                        System.out.println(line.localToScene(line.getLayoutBounds()).getMinX() - root.localToScene(root.getLayoutBounds()).getMinX() + "asdf");
-
-                    }
-                } catch (InterruptedException e) {
-                    System.out.println("yo");
-                }
-            }
-        }).start();*/
     }
 
     public void setEntity(EntityER entity) {
         if(entity != null) {
             this.entity = entity;
-            //cardinality.setEntity(this.entity.entity);
+            cardinality.setEntity(this.entity.entity);
             if(relationship != null)
                 drawPane();
             line.setEndX(entity.group.getLayoutX()
@@ -88,9 +88,74 @@ public class CardinalityER extends DiagramElement {
                     - root.localToScene(root.getLayoutBounds()).getMinY()
                     + relationship.group.localToScene(relationship.group.getLayoutBounds()).getHeight() / 2);
         }
+        line.startXProperty().addListener((obs, oldVal, newVal) -> {
+            clickableArea.setX(newVal.doubleValue());
+        });
+        line.startYProperty().addListener((obs, oldVal, newVal) -> {
+            clickableArea.setY(newVal.doubleValue());
+        });
+        line.endXProperty().addListener((obs, oldVal, newVal) -> {
+            clickableArea.setWidth(newVal.doubleValue());
+        });
+        line.endYProperty().addListener((obs, oldVal, newVal) -> {
+            clickableArea.setHeight(newVal.doubleValue());
+        });
     }
+    private void replaceCardinality(Cardinality newCardinality) {
+        //System.out.println("Then\t"+cardinality.getClass().toString());
+        cardinality.getRelationship().getLinks().remove(cardinality);
+        cardinality = Cardinality.copyCardinality(cardinality, newCardinality);
+        cardinality.getRelationship().getLinks().add(cardinality);
+        //System.out.println("After\t"+cardinality.getClass().toString());
+    }
+    private void initializeMenuEvents() {
+        many.setOnAction(event -> {
+            replaceCardinality(new Many());
+            /*
+            PrimaryKey primaryKey = new PrimaryKey(new TInteger());
+            entity.addPrimaryKey(primaryKey);
+            attributesFactory.create(root
+                    , group
+                    , primaryKey);
+            addLastFromFactory();
+            */
 
+        });
+        one.setOnAction(event -> {
+            replaceCardinality(new One());
+            /*
+            NormalAttribute na = new NormalAttribute(new TInteger());
+            entity.addNormalAttribute(na);
+            attributesFactory.create(root
+                    , group
+                    , na);
+            addLastFromFactory();
+            */
+        });
+        oneOrMore.setOnAction(e -> {
+            replaceCardinality(new OneOrMore());
+            /*
+            Optional<String> result = textInputDialog.showAndWait();
+            result.ifPresent(name -> entityName.setText(name));
+            */
+        });
+        onlyOne.setOnAction((ActionEvent event) -> {
+            replaceCardinality(new OnlyOne());
+        });
+        line.setOnContextMenuRequested(event -> {
+            contextMenu.show(line, event.getScreenX(), event.getScreenY());
+        });
+    }
+    private void initializeMenu() {
+        contextMenu = new ContextMenu();
+        one = new MenuItem("One");
+        oneOrMore = new MenuItem("One or more");
+        many = new MenuItem("Many");
+        onlyOne = new MenuItem("Only one");
 
+        contextMenu.getItems().addAll(one, oneOrMore, many, onlyOne);
+        initializeMenuEvents();
+    }
     private void initializeCardinality() {
         line = new Line();
         c1 = new Label();
@@ -104,8 +169,9 @@ public class CardinalityER extends DiagramElement {
     @Override
     public void drawPane() {
         line.setFill(Color.BLACK);
+        line.setStrokeWidth(LINE_THICKNESS);
         //group.getChildren().addAll(c1, c2);
-        root.getChildren().addAll(line, group,c1,c2, clickableArea);
+        root.getChildren().addAll(line, group,c1,c2);
         line.toBack();
         line.toBack();
         c1.toBack();

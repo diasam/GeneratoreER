@@ -31,6 +31,7 @@ public abstract class Database {
         this.indentation = indentation;
     }
     protected void append(Visitable visitable, String s) {
+
         script.put(visitable, script.getOrDefault(visitable, "").concat(s));
     }
     protected void addIndentation(Visitable visitable) {

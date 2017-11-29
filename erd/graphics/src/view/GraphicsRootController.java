@@ -52,6 +52,7 @@ public class GraphicsRootController {
                 d.generate(erd);
                 System.out.println(d.getScript(erd));
                 System.out.println(System.currentTimeMillis() - a);
+
             }
         });
     }

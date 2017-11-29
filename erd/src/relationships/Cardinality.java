@@ -74,7 +74,11 @@ public abstract class Cardinality implements Observer, Visitable {
             relationship.checkCardinalities();
         }
     }
-
+    public static Cardinality copyCardinality(Cardinality from, Cardinality to) {
+        to.setEntity(from.getEntity());
+        to.setRelationship(from.getRelationship());
+        return to;
+    }
     @Override
     public abstract String accept(Database database);
 }

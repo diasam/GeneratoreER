@@ -40,36 +40,47 @@ public abstract class AttributeER extends DiagramElement{
         ellipse = new Ellipse();
         label = new Label(attribute.getName());
         label.setWrapText(true);
-        line = new Line(group.getLayoutX() + group.localToScene(group.getLayoutBounds()).getWidth() / 2,
-                group.getLayoutY() + group.localToScene(group.getLayoutBounds()).getHeight() / 2,
-                entityGroup.getLayoutX() + entityGroup.localToScene(entityGroup.getLayoutBounds()).getWidth() / 2,
-                entityGroup.getLayoutY() + entityGroup.localToScene(entityGroup.getLayoutBounds()).getHeight() / 2);
+        line = new Line(group.getLayoutX() + group.localToScene(group.getLayoutBounds()).getWidth() / 2
+                ,group.getLayoutY() + group.localToScene(group.getLayoutBounds()).getHeight() / 2
+                ,entityGroup.getLayoutX() + entityGroup.localToScene(entityGroup.getLayoutBounds()).getWidth() / 2
+                ,entityGroup.getLayoutY() + entityGroup.localToScene(entityGroup.getLayoutBounds()).getHeight() / 2);
 
         group.getChildren().addAll(ellipse, label);
         root.getChildren().addAll(line,group);
         initializeAttributeEvents();
     }
     private void initializeAttributeEvents() {
+        label.textProperty().addListener((obs, oldVal, newVal) -> {
+            attribute.setName(newVal );
+        });
         group.setOnMouseDragged((e) -> {
             group.relocate(
-                    e.getSceneX() - root.localToScene(root.getLayoutBounds()).getMinX() - group.localToScene(group.getLayoutBounds()).getWidth() / 2,
-                    e.getSceneY() - root.localToScene(root.getLayoutBounds()).getMinY() - group.localToScene(group.getLayoutBounds()).getHeight() / 2);
+                    e.getSceneX() - root.localToScene(root.getLayoutBounds()).getMinX()
+                            - group.localToScene(group.getLayoutBounds()).getWidth() / 2,
+                    e.getSceneY()
+                            - root.localToScene(root.getLayoutBounds()).getMinY()
+                            - group.localToScene(group.getLayoutBounds()).getHeight() / 2);
         });
 
         group.layoutXProperty().addListener((obs, oldVal, newVal) -> {
-            line.setStartX(newVal.doubleValue() + label.localToScene(label.getLayoutBounds()).getWidth() / 2);
+            line.setStartX(newVal.doubleValue()
+                    + label.localToScene(label.getLayoutBounds()).getWidth() / 2);
 
         });
         group.layoutYProperty().addListener((obs, oldVal, newVal) -> {
-            line.setStartY(newVal.doubleValue() + label.localToScene(label.getLayoutBounds()).getHeight() / 2);
+            line.setStartY(newVal.doubleValue()
+                    + label.localToScene(label.getLayoutBounds()).getHeight() / 2);
         });
         label.widthProperty().addListener((obs, oldVal, newVal) -> {
-            line.setStartX(label.localToScene(label.getLayoutBounds()).getMinX() - root.localToScene(root.getLayoutBounds()).getMinX() + newVal.doubleValue() / 2);
-            ellipse.setRadiusX((newVal.doubleValue() + PADDING) / 2);
+            line.setStartX(label.localToScene(label.getLayoutBounds()).getMinX()
+                    - root.localToScene(root.getLayoutBounds()).getMinX() + newVal.doubleValue() / 2);
+            ellipse.setRadiusX((newVal.doubleValue()
+                    + PADDING) / 2);
             ellipse.setCenterX(label.localToScene(label.getLayoutBounds()).getWidth() / 2);
         });
         label.heightProperty().addListener((obs, oldVal, newVal) -> {
-            line.setStartY(label.localToScene(label.getLayoutBounds()).getMinY() - root.localToScene(root.getLayoutBounds()).getMinY() + newVal.doubleValue() / 2);
+            line.setStartY(label.localToScene(label.getLayoutBounds()).getMinY()
+                    - root.localToScene(root.getLayoutBounds()).getMinY() + newVal.doubleValue() / 2);
             ellipse.setRadiusY((newVal.doubleValue() + PADDING) / 2);
             ellipse.setCenterY(label.localToScene(label.getLayoutBounds()).getHeight() / 2);
         });
@@ -77,14 +88,15 @@ public abstract class AttributeER extends DiagramElement{
             ellipse.setCenterX(newVal.doubleValue() / 2);
         });
         label.layoutYProperty().addListener((obs, oldVal, newVal) -> {
-            System.out.println("there");
             ellipse.setCenterY(label.localToScene(label.getLayoutBounds()).getHeight()/2);
         });
         entityGroup.layoutXProperty().addListener((e) -> {
-            line.setEndX(entityGroup.getLayoutX() + entityGroup.localToScene(entityGroup.getLayoutBounds()).getWidth() / 2);
+            line.setEndX(entityGroup.getLayoutX()
+                    + entityGroup.localToScene(entityGroup.getLayoutBounds()).getWidth() / 2);
         });
         entityGroup.layoutYProperty().addListener((e) -> {
-            line.setEndY(entityGroup.getLayoutY() + entityGroup.localToScene(entityGroup.getLayoutBounds()).getHeight() / 2);
+            line.setEndY(entityGroup.getLayoutY()
+                    + entityGroup.localToScene(entityGroup.getLayoutBounds()).getHeight() / 2);
         });
     }
     @Override

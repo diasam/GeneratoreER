@@ -194,6 +194,7 @@ public class Sql extends Database {
     public String generate(Many many) {
         many.getEntity().accept(this);
         return "";
+        //return many.getEntity().accept(this);
 
     }
 
@@ -201,6 +202,7 @@ public class Sql extends Database {
     public String generate(One one) {
         one.getEntity().accept(this);
         return "";
+        //return one.getEntity().accept(this);
     }
 
     protected void endInstruction(Visitable visitable) {
@@ -215,6 +217,7 @@ public class Sql extends Database {
     public String generate(OneOrMore oneOrMore) {
         oneOrMore.getEntity().accept(this);
         return "";
+        //return oneOrMore.getEntity().accept(this);
     }
 
     @Override

@@ -96,7 +96,6 @@ public class Relationship implements Visitable {
                 .findFirst();
         if(e.isPresent()) {
             t.addDependency(e.get().getEntity());
-
         }
 
     }
@@ -116,6 +115,8 @@ public class Relationship implements Visitable {
             for(Cardinality c : links) {
                 if(c instanceof Many || c instanceof OneOrMore) {
                     cnt++;
+
+                    //System.out.printf("Counter:\t\t %s ",c.getClass().toString());
                 }
             }
             if(cnt == links.size()) {
@@ -135,6 +136,7 @@ public class Relationship implements Visitable {
     }
 
     public Table getTable() {
+        table.getForeignKeys().stream().forEach(x -> System.out.println("\t\t\t\tspaghetti"+x.getName()));
         return table;
     }
 

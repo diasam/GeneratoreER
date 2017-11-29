@@ -2,7 +2,7 @@ package view;
 
 import javafx.collections.ListChangeListener;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -10,10 +10,21 @@ import javafx.scene.shape.Rectangle;
 import model.Erd;
 import relationships.Relationship;
 
+import java.util.Optional;
+
 public class RelationshipER extends DiagramElement {
     protected Relationship relationship;
     protected Rectangle relationshipRectangle;
     protected Label label;
+
+    protected ContextMenu contextMenu;
+    protected Menu attributes;
+    protected MenuItem pk;
+    protected MenuItem att;
+    protected MenuItem changeName;
+    protected MenuItem delete;
+    private TextInputDialog textInputDialog;
+
     protected static final Color BACKGROUND = Color.WHITE;
     protected static final Color STROKE = Color.BLACK;
     public RelationshipER(Pane root, Erd erd) {
@@ -27,6 +38,7 @@ public class RelationshipER extends DiagramElement {
         super(root, group, erd);
         this.relationship = relationship;
         initializeRelationship();
+        initializeMenu();
         drawPane();
     }
     private void initializeRelationship() {
@@ -38,6 +50,9 @@ public class RelationshipER extends DiagramElement {
         initializeRelationshipEvents();
     }
     private void initializeRelationshipEvents() {
+        label.textProperty().addListener((obs, oldVal, newVal) -> {
+            relationship.setName(newVal);
+        });
         label.widthProperty().addListener((obs, oldValue, newValue) -> {
             relationshipRectangle.setWidth(newValue.doubleValue());
             relationshipRectangle.setHeight(newValue.doubleValue());
@@ -60,7 +75,7 @@ public class RelationshipER extends DiagramElement {
         });
         group.setOnMouseClicked(e -> {
             if(e.getButton().compareTo(MouseButton.PRIMARY) == 0 && e.isMetaDown()) {
-                System.out.println(e);
+                //System.out.println(e);
                 CardinalityER c = new CardinalityER(root, erd);
                 relationship.addCardinality(c.cardinality);
                 c.setRelationship(this);
@@ -70,7 +85,7 @@ public class RelationshipER extends DiagramElement {
                         if(x instanceof EntityER) {
                             c.setEntity((EntityER) x);
                         }
-                        ChronoEvents.getInstance().getEvents().stream().forEach(System.out::println);
+                        //ChronoEvents.getInstance().getEvents().stream().forEach(System.out::println);
                     });
                 };
                 ChronoEvents.getInstance().getEvents().addListener(listener);
@@ -89,6 +104,23 @@ public class RelationshipER extends DiagramElement {
 
         }
         */
+    }
+    private void initializeMenu() {
+        contextMenu = new ContextMenu();
+        changeName = new MenuItem("changeName");
+        contextMenu.getItems().add(changeName);
+        initializeMenuEvents();
+    }
+
+    private void initializeMenuEvents() {
+        textInputDialog = new TextInputDialog(relationship.getName());
+        textInputDialog.setTitle("Change name");
+        textInputDialog.setContentText("Please, insert a new name");
+        changeName.setOnAction(e -> {
+            Optional<String> result = textInputDialog.showAndWait();
+            result.ifPresent(name -> label.setText(name));
+        });
+        group.setOnContextMenuRequested(event -> contextMenu.show(group, event.getScreenX(), event.getScreenY()));
     }
 
     @Override
