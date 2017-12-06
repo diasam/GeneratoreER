@@ -3,6 +3,7 @@ package relationships;
 import database.Database;
 import database.Visitable;
 import entites.Entity;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -12,7 +13,7 @@ public abstract class Cardinality implements Observer, Visitable {
     private Relationship relationship;
     private int min;
     private int max;
-    protected final static int MANY_CARD = -1;
+    public final static int MANY_CARD = -1;
     public Cardinality(int min, int max) {
         this.max = max;
         this.min = min;
@@ -70,6 +71,7 @@ public abstract class Cardinality implements Observer, Visitable {
 
     @Override
     public void update(Observable o, Object arg) {
+        System.out.println("updating");
         if(relationship != null) {
             relationship.checkCardinalities();
         }
@@ -77,6 +79,7 @@ public abstract class Cardinality implements Observer, Visitable {
     public static Cardinality copyCardinality(Cardinality from, Cardinality to) {
         to.setEntity(from.getEntity());
         to.setRelationship(from.getRelationship());
+
         return to;
     }
     @Override

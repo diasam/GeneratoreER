@@ -14,27 +14,27 @@ import model.Erd;
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Optional;
 
 public class GraphicsRootController {
     @FXML
     private Pane erPane;
 
-    @FXML
-
     private Erd erd = new Erd("Noname");
     private Scene scene;
+
+    private static final int OFFSET_X_SCREENSHOT = 20;
+    private static final int OFFSET_Y_SCREENSHOT = 20;
 
 
     public GraphicsRootController() {
 
     }
+
     @FXML
     private void initialize() {
-        //myPane = new EntityER();
-        //Pane erPane = ((Pane)scene.lookup("#erPane"));
-        //((Pane)scene.lookup("#erPane")).requestLayout();
-
         erPane.setOnMouseClicked((e) -> {
             if(e.isShiftDown()) {
                 if (e.getButton().compareTo(MouseButton.PRIMARY) == 0) {
@@ -47,6 +47,7 @@ public class GraphicsRootController {
                 }
             }
             if(e.isAltDown()) {
+                erd.getRelationships().stream().forEach(System.out::println);
                 Database d = new Sql();
                 long a = System.currentTimeMillis();
                 d.generate(erd);
@@ -57,27 +58,84 @@ public class GraphicsRootController {
         });
     }
     @FXML
-    private void export() {
+    private void exportImage() {
         FileChooser fileChooser = new FileChooser();
 
-        //Set extension filter
+        //Imposta un filtro per la estensione
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("png files (*.png)", "*.png"));
 
-        //Prompt user to select a file
-        File file = fileChooser.showSaveDialog(null);
+        //Chiede all'utente di selezionare un file
+        Optional.ofNullable(fileChooser.showSaveDialog(null))
+                .ifPresent(file -> {
+                    try {
+                        WritableImage writableImage = new WritableImage((int)erPane.getWidth() + OFFSET_X_SCREENSHOT,
+                                (int)erPane.getHeight() + OFFSET_Y_SCREENSHOT);
+                        erPane.snapshot(null, writableImage);
+                        // Scrive lo snapshot sul file impostato dall'utente
+                        ImageIO.write(SwingFXUtils.fromFXImage(writableImage, null)
+                                     , "png"
+                                     , file);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                });
 
-        if(file != null){
-            try {
-                //Pad the capture area
-                WritableImage writableImage = new WritableImage((int)erPane.getWidth() + 20,
-                        (int)erPane.getHeight() + 20);
-                erPane.snapshot(null, writableImage);
 
-                RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
-                //Write the snapshot to the chosen file
-                ImageIO.write(renderedImage, "png", file);
-            } catch (IOException ex) { ex.printStackTrace(); }
-        }
+    }
+    @FXML
+    private void exportScript() {
+        /*
+        FileChooser fileChooser = new FileChooser();
+
+        //Imposta un filtro per la estensione
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("sql files (*.sql)", "*.sql"));
+
+        //Chiede all'utente di selezionare un file
+        Optional.ofNullable(fileChooser.showSaveDialog(null))
+                .ifPresent(file -> {
+
+                    try {
+                        if(file.canWrite()) {
+                            FileOutputStream fileOutputStream = new FileOutputStream(file);
+                            Database generator = new Sql();
+                            generator.generate(erd);
+                            fileOutputStream.write(generator.getScript(erd).getBytes());
+                            fileOutputStream.close();
+                        }
+
+                        WritableImage writableImage = new WritableImage((int)erPane.getWidth() + OFFSET_X_SCREENSHOT,
+                                (int)erPane.getHeight() + OFFSET_Y_SCREENSHOT);
+                        erPane.snapshot(null, writableImage);
+                        // Scrive lo snapshot sul file impostato dall'utente
+                        ImageIO.write(SwingFXUtils.fromFXImage(writableImage, null)
+                                , "png"
+                                , file);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+        */
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("sql files (*.sql)", "*.sql"));
+        Optional.ofNullable(fileChooser.showSaveDialog(null))
+                .ifPresent(file -> {
+                    new Thread(() -> {
+                        try {
+                                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                                Database generator = new Sql();
+                                generator.generate(erd);
+                                fileOutputStream.write(generator.getScript(erd).getBytes());
+                                fileOutputStream.close();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }).start();
+                });
+
+
+
+
+
     }
 
 

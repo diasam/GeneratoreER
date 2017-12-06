@@ -26,10 +26,12 @@ public class Sql extends Database {
     }
     @Override
     public String getScript(Erd erd) {
+        erd.getRelationshipTables().stream().map(x -> script.getOrDefault(x, "not defined")).forEach(System.out::println);
         Stream.concat(erd.getEntities().stream(), erd.getRelationshipTables().stream()).forEach((x) -> {
-            removeLast(x);
-            newLine(x);
-            append(x, ");");
+                removeLast(x);
+                newLine(x);
+                append(x, ");");
+
         });
         return script.get(erd)
                 .concat(erd.getEntities().stream()
@@ -41,6 +43,7 @@ public class Sql extends Database {
     }
     @Override
     public String generate(NormalAttribute normalAttribute) {
+        System.out.println(normalAttribute.getName());
         return normalAttribute.getName().concat(" ")
                 .concat(normalAttribute.getDataType().accept(this));
 
@@ -59,8 +62,9 @@ public class Sql extends Database {
     @Override
     public String generate(ForeignKey foreignKey) {
         return foreignKey.getName().concat(" ")
-                .concat(foreignKey.getDataType().accept(this))
-                .concat(", ")
+                //TODO Documentare bug
+                //.concat(foreignKey.getDataType().accept(this))
+                //.concat(", ")
                 .concat("FOREIGN KEY (")
                 .concat(foreignKey.getName())
                 .concat(") REFERENCES ")
@@ -102,12 +106,14 @@ public class Sql extends Database {
     @Override
     public String generate(Entity entity) {
         if(!tablesCreated.containsKey(entity)) {
+
             tablesCreated.put(entity, true);
             done = false;
             append(entity, "create table ".concat(entity.getName()).concat(" ("));
             addIndentation(entity);
             indent(entity);
             newLine(entity);
+            //entity.getNormalAttributes().stream().forEach(x -> System.out.println(x.getName()));
             entity.getNormalAttributes().stream().forEach((x) -> {
                 append(entity, x.accept(this).concat(","));
                 done = true;
@@ -243,11 +249,20 @@ public class Sql extends Database {
 
     @Override
     public String generate(Relationship relationship) {
+        System.out.println("Generazione relazione, numero collegamenti: \t\t\t\t"+relationship.getLinks().size());
+        relationship.getLinks().stream()
+                .forEach(cardinality -> System.out.println("Generazione relazioni: \t\t\t\t"+cardinality.getEntity().getName()));
         relationship.getLinks().stream()
                 .filter((x) -> x instanceof Many || x instanceof OneOrMore)
+
+                .map(cardinality -> {System.out.println("Generazione relazioni: \t\t\t\t"+cardinality.getEntity().getName()); return cardinality;})
+
                 .forEach((x) -> x.accept(this));
         relationship.getLinks().stream()
                 .filter((x) -> x instanceof One || x instanceof OnlyOne)
+
+                .map(cardinality -> {System.out.println("Generazione relazioni: \t\t\t\t"+cardinality.getEntity().getName()); return cardinality;})
+
                 .forEach((x) -> x.accept(this));
         return "";
     }

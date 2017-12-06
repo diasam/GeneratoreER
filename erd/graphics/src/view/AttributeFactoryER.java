@@ -22,4 +22,7 @@ public class AttributeFactoryER {
     public ArrayList<AttributeER> getAttributes() {
         return attributes;
     }
+    public AttributeER getLast() {
+        return attributes.get(attributes.size()-1);
+    }
 }

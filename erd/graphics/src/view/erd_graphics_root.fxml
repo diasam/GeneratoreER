@@ -18,7 +18,12 @@
                         <MenuItem mnemonicParsing="false" text="Open" />
                         <MenuItem mnemonicParsing="false" text="Save" />
                         <MenuItem mnemonicParsing="false" text="Save as" />
-                        <MenuItem mnemonicParsing="false" onAction="#export" text="Export image" />
+                        <Menu mnemonicParsing="false" text="Export">
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#exportScript" text="Export script" />
+                              <MenuItem mnemonicParsing="false" onAction="#exportImage" text="Export image" />
+                          </items>
+                        </Menu>
                         <MenuItem mnemonicParsing="false" text="Print" />
                     <MenuItem mnemonicParsing="false" text="Exit" />
                   </items>

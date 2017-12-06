@@ -62,7 +62,6 @@ public class Entity extends Observable implements Table, Visitable{
     @Override
     public List<Attribute> getForeignKeys() {
         List<Attribute> fks = new ArrayList<>();
-        //dependencies.forEach(x -> fks.addAll(x.getPrimaryKeys()));
         dependencies.forEach((x) -> {
             x.getPrimaryKeys().forEach(y -> fks.add(new ForeignKey(y, x)));
         });
@@ -77,7 +76,7 @@ public class Entity extends Observable implements Table, Visitable{
         return database.generate(this);
     }
 
-    private void changed() {
+    public void changed() {
         setChanged();
         notifyObservers();
     }

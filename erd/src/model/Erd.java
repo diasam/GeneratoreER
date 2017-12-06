@@ -9,6 +9,7 @@ import relationships.Relationship;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Erd implements Visitable {
     public String name;
@@ -33,6 +34,7 @@ public class Erd implements Visitable {
         orderEntities();
         return entities;
     }
+
     private void orderEntities() {
         Table e;
         for(int i = 0; i < entities.size(); i++) {
@@ -47,11 +49,15 @@ public class Erd implements Visitable {
     }
 
     public List<Relationship> getRelationships() {
+        relationships.forEach(relationship -> relationship.getLinks().forEach(cardinality -> System.out.println(cardinality.getEntity())));
         return relationships;
     }
 
 
     public List<Table> getRelationshipTables() {
+        System.out.print("ABC\t\t");
+        relationshipTables.stream().map(Table::getPrimaryKeys).forEach(System.out::println);
+        //relationshipTables.stream().map(Table::getPrimaryKeys).collect(Collectors.toList()).forEach(System.out::println);
         return relationshipTables;
     }
 

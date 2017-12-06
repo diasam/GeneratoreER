@@ -1,6 +1,10 @@
 package view;
 
+import attributes.NormalAttribute;
+import attributes.PrimaryKey;
+import datatypes.TInteger;
 import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -13,6 +17,10 @@ import relationships.Relationship;
 import java.util.Optional;
 
 public class RelationshipER extends DiagramElement {
+
+
+    protected final AttributeFactoryER attributesFactory = new AttributeFactoryER();
+
     protected Relationship relationship;
     protected Rectangle relationshipRectangle;
     protected Label label;
@@ -22,6 +30,7 @@ public class RelationshipER extends DiagramElement {
     protected MenuItem pk;
     protected MenuItem att;
     protected MenuItem changeName;
+
     protected MenuItem delete;
     private TextInputDialog textInputDialog;
 
@@ -37,6 +46,8 @@ public class RelationshipER extends DiagramElement {
     public RelationshipER(Pane root, Group group, Erd erd, Relationship relationship) {
         super(root, group, erd);
         this.relationship = relationship;
+        //TODO Documentare
+        erd.addRelationship(relationship);
         initializeRelationship();
         initializeMenu();
         drawPane();
@@ -47,6 +58,7 @@ public class RelationshipER extends DiagramElement {
         label.setWrapText(true);
         group.getChildren().addAll(relationshipRectangle, label);
         root.getChildren().add(group);
+
         initializeRelationshipEvents();
     }
     private void initializeRelationshipEvents() {
@@ -56,6 +68,10 @@ public class RelationshipER extends DiagramElement {
         label.widthProperty().addListener((obs, oldValue, newValue) -> {
             relationshipRectangle.setWidth(newValue.doubleValue());
             relationshipRectangle.setHeight(newValue.doubleValue());
+            double h = relationshipRectangle.localToScene(relationshipRectangle.getLayoutBounds()).getHeight();
+            double w = relationshipRectangle.localToScene(relationshipRectangle.getLayoutBounds()).getWidth();
+            double diagonal = Math.sqrt(Math.pow(h, 2) + Math.pow(w, 2));
+            label.setLayoutY(diagonal / 4 - label.getHeight() / 2);
         });
         label.heightProperty().addListener((obs, oldValue, newValue) -> {
             double h = relationshipRectangle.localToScene(relationshipRectangle.getLayoutBounds()).getHeight();
@@ -108,7 +124,12 @@ public class RelationshipER extends DiagramElement {
     private void initializeMenu() {
         contextMenu = new ContextMenu();
         changeName = new MenuItem("changeName");
-        contextMenu.getItems().add(changeName);
+        attributes = new Menu("Add Attribute");
+        pk = new MenuItem("Primary key");
+        att = new MenuItem("Attribute");
+        delete = new MenuItem("Delete");
+        contextMenu.getItems().addAll(attributes, changeName);
+        attributes.getItems().addAll(att, pk);
         initializeMenuEvents();
     }
 
@@ -117,10 +138,34 @@ public class RelationshipER extends DiagramElement {
         textInputDialog.setTitle("Change name");
         textInputDialog.setContentText("Please, insert a new name");
         changeName.setOnAction(e -> {
-            Optional<String> result = textInputDialog.showAndWait();
-            result.ifPresent(name -> label.setText(name));
+            textInputDialog.showAndWait()
+                .ifPresent(name -> label.setText(name));
         });
         group.setOnContextMenuRequested(event -> contextMenu.show(group, event.getScreenX(), event.getScreenY()));
+
+        pk.setOnAction(event -> {
+            PrimaryKey primaryKey = new PrimaryKey(new TInteger());
+            relationship.getAttributes().add(primaryKey);
+            attributesFactory.create(root
+                    , group
+                    , primaryKey);
+            addLastFromFactory();
+        });
+        att.setOnAction(event -> {
+            NormalAttribute na = new NormalAttribute(new TInteger());
+            relationship.getAttributes().add(na);
+            attributesFactory.create(root
+                    , group
+                    , na);
+            addLastFromFactory();
+        });
+        delete.setOnAction((ActionEvent event) -> {
+            deleteChildrens();
+        });
+        group.setOnContextMenuRequested(event -> {
+            contextMenu.show(label, event.getScreenX(), event.getScreenY());
+        });
+
     }
 
     @Override
@@ -132,6 +177,12 @@ public class RelationshipER extends DiagramElement {
 
     @Override
     protected void deleteChildrens() {
+        children.forEach(x -> x.deleteChildrens());
+        root.getChildren().remove(group);
 
+    }
+    private void addLastFromFactory() {
+        //children.add(attributesFactory.getAttributes().get(attributesFactory.getAttributes().size()-1));
+        children.add(attributesFactory.getLast());
     }
 }

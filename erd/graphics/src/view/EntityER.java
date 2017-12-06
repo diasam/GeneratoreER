@@ -34,6 +34,7 @@ public class EntityER extends DiagramElement {
     protected TextInputDialog textInputDialog;
     protected static final int WIDTH = 100;
     protected static final int HEIGHT = 50;
+    protected static final Color BACKGROUND = Color.WHITE;
     public EntityER() {
         super();
     }
@@ -64,6 +65,7 @@ public class EntityER extends DiagramElement {
     private void initializeEntityEvents() {
         entityName.textProperty().addListener((obs, oldVal, newVal) -> {
             entity.setName(newVal);
+            System.out.println(entity.getName());
         });
         entityName.widthProperty().addListener((obs, oldVal, newVal) -> {
             if(entityRect.getWidth() < newVal.doubleValue())
@@ -135,10 +137,11 @@ public class EntityER extends DiagramElement {
         });
     }
     private void addLastFromFactory() {
-        children.add(attributesFactory.getAttributes().get(attributesFactory.getAttributes().size()-1));
+        //children.add(attributesFactory.getAttributes().get(attributesFactory.getAttributes().size()-1));
+        children.add(attributesFactory.getLast());
     }
     public void drawPane() {
-        entityRect.setFill(Color.WHITE);
+        entityRect.setFill(BACKGROUND);
         entityRect.setStroke(Color.BLACK);
     }
 
@@ -153,7 +156,6 @@ public class EntityER extends DiagramElement {
 
     @Override
     protected void deleteChildrens() {
-        //System.out.println(children.size());
         children.forEach(x -> x.deleteChildrens());
         root.getChildren().remove(group);
     }

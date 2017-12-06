@@ -21,8 +21,6 @@ public class CardinalityER extends DiagramElement {
     protected EntityER entity;
     protected RelationshipER relationship;
     protected Label c1;
-    protected Label c2;
-    protected Rectangle clickableArea;
 
     protected ContextMenu contextMenu;
     protected MenuItem many;
@@ -30,22 +28,25 @@ public class CardinalityER extends DiagramElement {
     protected MenuItem oneOrMore;
     protected MenuItem onlyOne;
 
+    protected static final Color LINE_COLOR = Color.DARKRED;
+
     private static final double LINE_THICKNESS = 5.0f;
     public CardinalityER(Pane root, Group group, Cardinality cardinality) {
         super(root, group);
         this.cardinality = cardinality;
         initializeCardinality();
         initializeMenu();
-        //drawPane();
     }
 
     public CardinalityER(Pane root, Erd erd) {
-        this(root, new Group(), new Many());
+        this(root, new Group(), new OnlyOne());
     }
 
     public void setEntity(EntityER entity) {
         if(entity != null) {
+            resetTextLabel();
             this.entity = entity;
+            entity.children.add(this);
             cardinality.setEntity(this.entity.entity);
             if(relationship != null)
                 drawPane();
@@ -65,22 +66,37 @@ public class CardinalityER extends DiagramElement {
     }
     public void setRelationship(RelationshipER relationship) {
         if(relationship != null) {
+            resetTextLabel();
             this.relationship = relationship;
             cardinality.setRelationship(this.relationship.relationship);
             if(entity != null)
                 drawPane();
+            relationship.label.widthProperty().addListener((obs, oldVal, newVal) -> {
+                System.out.println("yoyo");
+                line.setStartX(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinX()
+                        - root.localToScene(root.getLayoutBounds()).getMinX()
+                        + relationship.group.localToScene(relationship.group.getLayoutBounds()).getWidth() / 2);
+            });
+
+            relationship.label.heightProperty().addListener((obs, oldVal, newVal) -> {
+                line.setStartY(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinY()
+                        - root.localToScene(root.getLayoutBounds()).getMinY()
+                        + relationship.group.localToScene(relationship.group.getLayoutBounds()).getHeight() / 2);
+            });
             relationship.group.layoutXProperty().addListener((obs, oldVal, newVal) -> {
-                //line.setStartX(newVal.doubleValue() + relationship.localToScene(relationship.getLayoutBounds()).getWidth() / 2);
                 line.setStartX(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinX()
                         - root.localToScene(root.getLayoutBounds()).getMinX()
                         + relationship.group.localToScene(relationship.group.getLayoutBounds()).getWidth() / 2);
             });
             relationship.group.layoutYProperty().addListener((obs, oldVal, newVal) -> {
-                //line.setStartY(newVal.doubleValue() + relationship.localToScene(relationship.getLayoutBounds()).getHeight() / 2);
+
                 line.setStartY(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinY()
                         - root.localToScene(root.getLayoutBounds()).getMinY()
                         + relationship.group.localToScene(relationship.group.getLayoutBounds()).getHeight() / 2);
             });
+
+
+
             line.setStartX(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinX()
                     - root.localToScene(root.getLayoutBounds()).getMinX()
                     + relationship.group.localToScene(relationship.group.getLayoutBounds()).getWidth() / 2);
@@ -89,55 +105,52 @@ public class CardinalityER extends DiagramElement {
                     + relationship.group.localToScene(relationship.group.getLayoutBounds()).getHeight() / 2);
         }
         line.startXProperty().addListener((obs, oldVal, newVal) -> {
-            clickableArea.setX(newVal.doubleValue());
+            c1.setLayoutX(newVal.doubleValue() + line.getEndX() - (newVal.doubleValue() + line.getEndX())/2);
         });
         line.startYProperty().addListener((obs, oldVal, newVal) -> {
-            clickableArea.setY(newVal.doubleValue());
+            c1.setLayoutY(newVal.doubleValue() + line.getEndY() - (newVal.doubleValue() + line.getEndY())/2);
         });
         line.endXProperty().addListener((obs, oldVal, newVal) -> {
-            clickableArea.setWidth(newVal.doubleValue());
+            c1.setLayoutX(newVal.doubleValue() + line.getStartX() - (newVal.doubleValue() + line.getStartX())/2);
         });
         line.endYProperty().addListener((obs, oldVal, newVal) -> {
-            clickableArea.setHeight(newVal.doubleValue());
+            c1.setLayoutY(newVal.doubleValue() + line.getStartY() - (newVal.doubleValue() + line.getStartY())/2);
         });
     }
+    private void resetTextLabel() {
+        int min = cardinality.getMin();
+        int max = cardinality.getMax();
+
+        c1.setText((min == Cardinality.MANY_CARD ? "N" : String.valueOf(min))
+                + "-"
+                + (max == Cardinality.MANY_CARD ? "N" : String.valueOf(max)));
+    }
     private void replaceCardinality(Cardinality newCardinality) {
-        //System.out.println("Then\t"+cardinality.getClass().toString());
+        System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
         cardinality.getRelationship().getLinks().remove(cardinality);
         cardinality = Cardinality.copyCardinality(cardinality, newCardinality);
         cardinality.getRelationship().getLinks().add(cardinality);
-        //System.out.println("After\t"+cardinality.getClass().toString());
+        entity.entity.changed();
+        System.out.println("Changed:\t\t\t"+(relationship.relationship.getLinks().stream().anyMatch(cardinality1 -> cardinality1.equals(cardinality))));
+        System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
+        erd.getRelationships().forEach((relationship) -> relationship.getLinks().forEach((cardinality) -> System.out.println(cardinality.getEntity())));
+
+        System.out.println(cardinality.getClass());
+        System.out.println("CIAO");
+        System.out.println(relationship.relationship.getLinks().contains(cardinality));
+        relationship.relationship.getLinks().forEach(x->System.out.println(x.getEntity().getName()));
+        System.out.println("CIAO");
+        resetTextLabel();
     }
     private void initializeMenuEvents() {
         many.setOnAction(event -> {
             replaceCardinality(new Many());
-            /*
-            PrimaryKey primaryKey = new PrimaryKey(new TInteger());
-            entity.addPrimaryKey(primaryKey);
-            attributesFactory.create(root
-                    , group
-                    , primaryKey);
-            addLastFromFactory();
-            */
-
         });
         one.setOnAction(event -> {
             replaceCardinality(new One());
-            /*
-            NormalAttribute na = new NormalAttribute(new TInteger());
-            entity.addNormalAttribute(na);
-            attributesFactory.create(root
-                    , group
-                    , na);
-            addLastFromFactory();
-            */
         });
         oneOrMore.setOnAction(e -> {
             replaceCardinality(new OneOrMore());
-            /*
-            Optional<String> result = textInputDialog.showAndWait();
-            result.ifPresent(name -> entityName.setText(name));
-            */
         });
         onlyOne.setOnAction((ActionEvent event) -> {
             replaceCardinality(new OnlyOne());
@@ -159,8 +172,7 @@ public class CardinalityER extends DiagramElement {
     private void initializeCardinality() {
         line = new Line();
         c1 = new Label();
-        c2 = new Label();
-        clickableArea = new Rectangle();
+
     }
     private void initializeEvents() {
 
@@ -168,18 +180,20 @@ public class CardinalityER extends DiagramElement {
 
     @Override
     public void drawPane() {
-        line.setFill(Color.BLACK);
+        line.setFill(LINE_COLOR);
         line.setStrokeWidth(LINE_THICKNESS);
-        //group.getChildren().addAll(c1, c2);
-        root.getChildren().addAll(line, group,c1,c2);
+        c1.setTextFill(Color.BLACK);
+        //c1.setLabelFor(line);
+        root.getChildren().addAll(line ,c1);
         line.toBack();
         line.toBack();
-        c1.toBack();
-        c1.toBack();
+        c1.toFront();
+        c1.toFront();
     }
 
     @Override
     protected void deleteChildrens() {
-
+        children.forEach(DiagramElement::deleteChildrens);
+        root.getChildren().removeAll(line, c1);
     }
 }
