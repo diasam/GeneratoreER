@@ -1,18 +1,17 @@
 package attributes;
 import database.Database;
-import database.Visitable;
+import database.Generable;
 import datatypes.DataType;
-import datatypes.TInteger;
+import entites.Table;
 
-import java.util.Observable;
-
-public abstract class Attribute implements Visitable {
+public abstract class Attribute implements Generable {
     private String name;
     private DataType dataType;
-
-    public Attribute(String name, DataType dataType) {
+    private Table table;
+    public Attribute(String name, DataType dataType, Table table) {
         this.name = name;
         this.dataType = dataType;
+        this.table = table;
     }
 
     public DataType getDataType() {
@@ -33,15 +32,20 @@ public abstract class Attribute implements Visitable {
 
     @Override
     public String toString() {
+
         return  "name='" + name + '\'' +
                 ", dataType=" + dataType;
     }
 
     @Override
     public abstract String accept(Database database);
-    public static void main(String[] args) {
-        Attribute pk = new PrimaryKey("abc", new TInteger());
-        System.out.println((ForeignKey) pk);
+
+    public void remove() {
+        if(table != null) {
+            table.getNormalAttributes().remove(this);
+            table.getPrimaryKeys().remove(this);
+        }
+
     }
 
 

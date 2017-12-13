@@ -3,13 +3,13 @@ package entites;
 import attributes.Attribute;
 import attributes.ForeignKey;
 import database.Database;
-import database.Visitable;
+import database.Generable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 
-public class Entity extends Observable implements Table, Visitable{
+public class Entity extends Observable implements Table, Generable {
     private String name;
     private final List<Attribute> normalAttributes;
     private final List<Attribute> primaryKeys;
@@ -62,9 +62,8 @@ public class Entity extends Observable implements Table, Visitable{
     @Override
     public List<Attribute> getForeignKeys() {
         List<Attribute> fks = new ArrayList<>();
-        dependencies.forEach((x) -> {
-            x.getPrimaryKeys().forEach(y -> fks.add(new ForeignKey(y, x)));
-        });
+        dependencies.forEach((entity) -> entity.getPrimaryKeys()
+                        .forEach(primaryKey -> fks.add(new ForeignKey(primaryKey, entity, this))));
         return fks;
     }
 

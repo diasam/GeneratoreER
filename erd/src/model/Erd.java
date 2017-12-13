@@ -1,17 +1,15 @@
 package model;
 
 import database.Database;
-import database.Visitable;
-import entites.Entity;
+import database.Generable;
 import entites.Table;
 import relationships.Relationship;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class Erd implements Visitable {
+public class Erd implements Generable {
     public String name;
     private final List<Table> entities;
     private final List<Relationship> relationships;

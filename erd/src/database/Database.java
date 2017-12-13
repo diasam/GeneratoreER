@@ -3,64 +3,58 @@ package database;
 import attributes.ForeignKey;
 import attributes.NormalAttribute;
 import attributes.PrimaryKey;
-import com.sun.tools.javac.code.Attribute;
 import datatypes.*;
 import entites.Entity;
-import entites.Table;
 import model.Erd;
 import relationships.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class Database {
-    protected final HashMap<Visitable, String> script;
-    protected final HashMap<Visitable, Integer> indentation;
+    protected final HashMap<Generable, String> script;
+    protected final HashMap<Generable, Integer> indentation;
     protected int indentationString;
 
     public Database() {
         this(0, new HashMap<>(), new HashMap<>());
     }
 
-    public Database(int indentationString, HashMap<Visitable, String> script, HashMap<Visitable, Integer> indentation) {
+    public Database(int indentationString, HashMap<Generable, String> script, HashMap<Generable, Integer> indentation) {
         this.indentationString = indentationString;
         this.script = script;
         this.indentation = indentation;
     }
-    protected void append(Visitable visitable, String s) {
+    protected void append(Generable generable, String s) {
 
-        script.put(visitable, script.getOrDefault(visitable, "").concat(s));
+        script.put(generable, script.getOrDefault(generable, "").concat(s));
     }
-    protected void addIndentation(Visitable visitable) {
-        indentation(visitable, 1);
+    protected void addIndentation(Generable generable) {
+        indentation(generable, 1);
     }
-    protected void subIndentation(Visitable visitable) {
-        indentation(visitable, -1);
+    protected void subIndentation(Generable generable) {
+        indentation(generable, -1);
     }
-    protected void indentation(Visitable visitable, int i) {
-        indentation.put(visitable, (indentation.getOrDefault(visitable, 0) + i));
+    protected void indentation(Generable generable, int i) {
+        indentation.put(generable, (indentation.getOrDefault(generable, 0) + i));
     }
-    protected void indent(Visitable visitable) {
-        if(indentation.containsKey(visitable)) {
-            for (int i = 0; i < indentation.get(visitable); i++)
-                append(visitable, "\t");
+    protected void indent(Generable generable) {
+        if(indentation.containsKey(generable)) {
+            for (int i = 0; i < indentation.get(generable); i++)
+                append(generable, "\t");
         }
     }
-    protected void resetIndentation(Visitable visitable) {
-        indentation.put(visitable, 0);
+    protected void resetIndentation(Generable generable) {
+        indentation.put(generable, 0);
     }
-    protected void newLine(Visitable visitable) {
-        append(visitable, "\n");
-        indent(visitable);
+    protected void newLine(Generable generable) {
+        append(generable, "\n");
+        indent(generable);
 
     }
-    protected void removeLast(Visitable visitable) {
+    protected void removeLast(Generable generable) {
         String s = "";
-        if(script.containsKey(visitable)) {
-            s = script.get(visitable);
+        if(script.containsKey(generable)) {
+            s = script.get(generable);
         }
         boolean flag = true;
         if(s.length() > 1) {
@@ -70,7 +64,7 @@ public abstract class Database {
             if (s.charAt(s.length() - 1) != '(')
                 s = s.substring(0, s.length() - 1);
         }
-        script.put(visitable, s);
+        script.put(generable, s);
 
     }
     public abstract String getScript(Erd erd);

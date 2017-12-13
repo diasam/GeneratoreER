@@ -2,8 +2,10 @@ package view;
 
 import database.Database;
 import database.Sql;
+import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
@@ -14,6 +16,7 @@ import model.Erd;
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Optional;
@@ -56,86 +59,59 @@ public class GraphicsRootController {
 
             }
         });
+        /*erPane.getChildren().addListener((ListChangeListener<? super Node>) (observable) -> {
+            observable.getAddedSubList().stream()
+                    .forEach(());
+
+        });
+*/
     }
     @FXML
     private void exportImage() {
         FileChooser fileChooser = new FileChooser();
-
         //Imposta un filtro per la estensione
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("png files (*.png)", "*.png"));
-
         //Chiede all'utente di selezionare un file
         Optional.ofNullable(fileChooser.showSaveDialog(null))
                 .ifPresent(file -> {
-                    try {
-                        WritableImage writableImage = new WritableImage((int)erPane.getWidth() + OFFSET_X_SCREENSHOT,
-                                (int)erPane.getHeight() + OFFSET_Y_SCREENSHOT);
-                        erPane.snapshot(null, writableImage);
-                        // Scrive lo snapshot sul file impostato dall'utente
-                        ImageIO.write(SwingFXUtils.fromFXImage(writableImage, null)
-                                     , "png"
-                                     , file);
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                });
-
-
-    }
-    @FXML
-    private void exportScript() {
-        /*
-        FileChooser fileChooser = new FileChooser();
-
-        //Imposta un filtro per la estensione
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("sql files (*.sql)", "*.sql"));
-
-        //Chiede all'utente di selezionare un file
-        Optional.ofNullable(fileChooser.showSaveDialog(null))
-                .ifPresent(file -> {
-
-                    try {
-                        if(file.canWrite()) {
-                            FileOutputStream fileOutputStream = new FileOutputStream(file);
-                            Database generator = new Sql();
-                            generator.generate(erd);
-                            fileOutputStream.write(generator.getScript(erd).getBytes());
-                            fileOutputStream.close();
-                        }
-
-                        WritableImage writableImage = new WritableImage((int)erPane.getWidth() + OFFSET_X_SCREENSHOT,
-                                (int)erPane.getHeight() + OFFSET_Y_SCREENSHOT);
-                        erPane.snapshot(null, writableImage);
-                        // Scrive lo snapshot sul file impostato dall'utente
-                        ImageIO.write(SwingFXUtils.fromFXImage(writableImage, null)
-                                , "png"
-                                , file);
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                });
-        */
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("sql files (*.sql)", "*.sql"));
-        Optional.ofNullable(fileChooser.showSaveDialog(null))
-                .ifPresent(file -> {
+                    WritableImage writableImage = new WritableImage((int)erPane.getWidth() + OFFSET_X_SCREENSHOT,
+                            (int)erPane.getHeight() + OFFSET_Y_SCREENSHOT);
+                    erPane.snapshot(null, writableImage);
                     new Thread(() -> {
                         try {
-                                FileOutputStream fileOutputStream = new FileOutputStream(file);
-                                Database generator = new Sql();
-                                generator.generate(erd);
-                                fileOutputStream.write(generator.getScript(erd).getBytes());
-                                fileOutputStream.close();
+                            ImageIO.write( SwingFXUtils.fromFXImage(writableImage, null)
+                                         , "png"
+                                         , file);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }).start();
                 });
+    }
+    @FXML
+    private void exportScript() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("sql files (*.sql)", "*.sql"));
+        Optional.ofNullable(fileChooser.showSaveDialog(null))
+                .ifPresent(file -> {
+                    new Thread(() -> {
+                        FileOutputStream fileOutputStream = null;
+                        try {
+                            fileOutputStream = new FileOutputStream(file);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                        Database generator = new Sql();
+                        generator.generate(erd);
+                        try {
 
-
-
-
-
+                            fileOutputStream.write(generator.getScript(erd).getBytes());
+                            fileOutputStream.close();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }).start();
+                });
     }
 
 

@@ -1,22 +1,18 @@
 package view;
 
-import attributes.Attribute;
 import attributes.NormalAttribute;
 import attributes.PrimaryKey;
 import datatypes.TInteger;
 import entites.Entity;
-import entites.Table;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import model.Erd;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class EntityER extends DiagramElement {
@@ -98,7 +94,7 @@ public class EntityER extends DiagramElement {
         attributes = new Menu("Add Attribute");
         pk = new MenuItem("Primary key");
         att = new MenuItem("Attribute");
-        changeName = new MenuItem("changeName");
+        changeName = new MenuItem("Change entity name");
         delete = new MenuItem("Delete");
         textInputDialog = new TextInputDialog(entity.getName());
         textInputDialog.setTitle("Change name");
@@ -110,7 +106,7 @@ public class EntityER extends DiagramElement {
 
     private void initializeMenuEvents() {
         pk.setOnAction(event -> {
-            PrimaryKey primaryKey = new PrimaryKey(new TInteger());
+            PrimaryKey primaryKey = new PrimaryKey(new TInteger(), entity);
             entity.addPrimaryKey(primaryKey);
             attributesFactory.create(root
                     , group
@@ -118,7 +114,7 @@ public class EntityER extends DiagramElement {
             addLastFromFactory();
         });
         att.setOnAction(event -> {
-            NormalAttribute na = new NormalAttribute(new TInteger());
+            NormalAttribute na = new NormalAttribute(new TInteger(), entity);
             entity.addNormalAttribute(na);
             attributesFactory.create(root
                     , group
@@ -130,7 +126,7 @@ public class EntityER extends DiagramElement {
             result.ifPresent(name -> entityName.setText(name));
         });
         delete.setOnAction((ActionEvent event) -> {
-            deleteChildrens();
+            deleteChildren();
         });
         group.setOnContextMenuRequested(event -> {
             contextMenu.show(entityRect, event.getScreenX(), event.getScreenY());
@@ -155,8 +151,9 @@ public class EntityER extends DiagramElement {
     }
 
     @Override
-    protected void deleteChildrens() {
-        children.forEach(x -> x.deleteChildrens());
+    protected void deleteChildren() {
+        children.forEach(x -> x.deleteChildren());
         root.getChildren().remove(group);
+        erd.getEntities().remove(entity);
     }
 }

@@ -1,6 +1,5 @@
 package database;
 
-import attributes.Attribute;
 import attributes.ForeignKey;
 import attributes.NormalAttribute;
 import attributes.PrimaryKey;
@@ -11,7 +10,6 @@ import model.Erd;
 import relationships.*;
 
 import java.util.HashMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Sql extends Database {
@@ -163,20 +161,20 @@ public class Sql extends Database {
         c1.setEntity(e1);
         c2.setEntity(e2);
         e2.setName("Prova_Entita2");
-        e2.addPrimaryKey(new PrimaryKey("foreign_test", new TDate()));
+        e2.addPrimaryKey(new PrimaryKey("foreign_test", new TDate(),e2));
         e1.setName("Prova_Entita1");
-        e1.addNormalAttribute(new NormalAttribute("normalAttribute", new TInteger()));
-        e1.addPrimaryKey(new PrimaryKey("PrimaryKey", new TInteger()));
+        e1.addNormalAttribute(new NormalAttribute("normalAttribute", new TInteger(),e1));
+        e1.addPrimaryKey(new PrimaryKey("PrimaryKey", new TInteger(),e1));
         r.addCardinality(c1);
         r.addCardinality(c2);
 
         Entity e3 = new Entity();
         e3.setName("Entity3");
 
-        e3.addPrimaryKey(new PrimaryKey("PrimaryKeyProva", new TInteger()));
+        e3.addPrimaryKey(new PrimaryKey("PrimaryKeyProva", new TInteger(),e3));
         Entity e4 = new Entity();
         e4.setName("Entity4");
-        e4.addPrimaryKey(new PrimaryKey("PrimaryKeyProva", new TInteger()));
+        e4.addPrimaryKey(new PrimaryKey("PrimaryKeyProva", new TInteger(),e4));
         Relationship r2 = new Relationship(erd);
         erd.addEntity(e3);
         erd.addEntity(e4);
@@ -191,7 +189,7 @@ public class Sql extends Database {
         Entity e5 = new Entity();
         e5.setName("no_dep");
         erd.addEntity(e5);
-        e5.addNormalAttribute(new NormalAttribute("Prova", new TInteger()));
+        e5.addNormalAttribute(new NormalAttribute("Prova", new TInteger(),e5));
         d.generate(erd);
         System.out.println(d.getScript(erd));
     }
@@ -211,12 +209,12 @@ public class Sql extends Database {
         //return one.getEntity().accept(this);
     }
 
-    protected void endInstruction(Visitable visitable) {
-        removeLast(visitable);
-        subIndentation(visitable);
-        newLine(visitable);
-        append(visitable,");");
-        newLine(visitable);
+    protected void endInstruction(Generable generable) {
+        removeLast(generable);
+        subIndentation(generable);
+        newLine(generable);
+        append(generable,");");
+        newLine(generable);
     }
 
     @Override

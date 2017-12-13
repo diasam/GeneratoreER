@@ -2,7 +2,7 @@ package relationships;
 
 import attributes.Attribute;
 import database.Database;
-import database.Visitable;
+import database.Generable;
 import entites.Entity;
 import entites.Table;
 import model.Erd;
@@ -10,16 +10,15 @@ import model.Erd;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class Relationship implements Visitable {
+public class Relationship implements Generable {
     private final Erd erd;
     private final List<Cardinality> links;
     private final List<Attribute> attributes;
     private String name;
     private Table table;
     public Relationship(Erd erd) {
-        this(new ArrayList<>(), new ArrayList<>(), "frt", erd);
+        this(new ArrayList<>(), new ArrayList<>(), "Relationship", erd);
     }
     public Relationship(List<Cardinality> links, List<Attribute> attributes, String name, Erd erd) {
         this.links = links;
@@ -45,29 +44,10 @@ public class Relationship implements Visitable {
 
     private void setCardinalityOneMore() {
         removeTable();
-        /*Optional<Cardinality> one = links.stream()
-                .filter((x) -> x instanceof One || x instanceof OnlyOne)
-                .findFirst();
-        Optional<Cardinality> many = links.stream()
-                .filter((x) -> x instanceof Many || x instanceof OneOrMore)
-                .findFirst();
-        if(one.isPresent() && many.isPresent()) {
-            one.get().getEntity().addDependency(many.get().getEntity());
-            if(attributes.size() > 0) {
-                createTable(new Entity(getName()
-                        , attributes
-                        , one.get().getEntity().getPrimaryKeys()
-                        , links.stream()
-                                    .map((x) -> x.getEntity())
-                                    .collect(Collectors.toList())));
-            }
-        }*/
-
-        System.out.println("Changed the thing");
         links.stream()
             .filter((x) -> x instanceof One || x instanceof OnlyOne)
             .findFirst()
-            .ifPresent((one) -> {
+            .ifPresent((one) ->
                 links.stream()
                         .filter((x) -> x instanceof Many || x instanceof OneOrMore)
                         .findFirst()
@@ -81,10 +61,14 @@ public class Relationship implements Visitable {
                                                 .collect(Collectors.toList())));
                             }
                             else {
-                                one.getEntity().addDependency(many.getEntity());
+                                System.out.println("One:\t\t"+(one.getEntity()==null));
+                                System.out.println("Many:\t\t"+(many.getEntity()==null));
+
+                                Optional.ofNullable(one.getEntity())
+                                        .ifPresent((entity -> one.getEntity().addDependency(entity)));
+                                //one.getEntity().addDependency(many.getEntity());
                             }
-                        });
-            }
+                        })
         );
 
 
@@ -130,14 +114,30 @@ public class Relationship implements Visitable {
                 .ifPresent(cardinality -> t.addDependency(cardinality.getEntity()));
 
     }
-    public void addCardinality(Cardinality cardinality) {
+    public boolean addCardinality(Cardinality cardinality) {
         Class c = cardinality.getClass();
+        boolean flag = false;
         // Si controlla se ci sono meno di due cardinalita
         // o se tutti i tipi di cardinalita sono identici
+        if(links.size() < 2) {
+            links.add(cardinality);
+            flag = true;
+        }
+
+        else if(links.stream().allMatch(x -> x.getClass().equals(c))
+                && links.stream().allMatch(x -> x instanceof Many || x instanceof OneOrMore)) {
+            links.add(cardinality);
+            flag = true;
+        }
+        /*
         if(links.size() < 2 || links.stream().allMatch((x) -> x.getClass().equals(c))) {
             links.add(cardinality);
             checkCardinalities();
+            flag = true;
         }
+        */
+        System.out.println("Flag: \t\t\t"+flag);
+        return flag;
     }
     public void removeCardinality(Cardinality cardinality) {
         links.remove(cardinality);

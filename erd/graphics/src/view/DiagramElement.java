@@ -78,5 +78,5 @@ public abstract class DiagramElement {
     }
 
     public abstract void drawPane();
-    protected abstract void deleteChildrens();
+    protected abstract void deleteChildren();
 }

@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="erd:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/erd_jar</output-path>
+    <root id="archive" name="erd.jar">
+      <element id="module-output" name="erd" />
+      <element id="module-output" name="graphics" />
+      <element id="extracted-dir" path="$APPLICATION_HOME_DIR$/plugins/junit/lib/junit-jupiter-api-5.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$APPLICATION_HOME_DIR$/plugins/junit/lib/opentest4j-1.0.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$APPLICATION_HOME_DIR$/redist/annotations-java8.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

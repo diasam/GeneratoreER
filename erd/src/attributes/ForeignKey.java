@@ -6,11 +6,11 @@ import entites.Table;
 
 public class ForeignKey extends Attribute {
     private Table reference;
-    public ForeignKey(String name, DataType dataType) {
-        super(name, dataType);
+    public ForeignKey(String name, DataType dataType, Table table) {
+        super(name, dataType, table);
     }
-    public ForeignKey(Attribute pk, Table reference) {
-        this(pk.getName(), pk.getDataType());
+    public ForeignKey(Attribute pk, Table reference, Table table) {
+        this(pk.getName(), pk.getDataType(), table);
         this.reference = reference;
     }
 

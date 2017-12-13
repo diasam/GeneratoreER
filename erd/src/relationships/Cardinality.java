@@ -1,14 +1,13 @@
 package relationships;
 
 import database.Database;
-import database.Visitable;
+import database.Generable;
 import entites.Entity;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.util.Observable;
 import java.util.Observer;
 
-public abstract class Cardinality implements Observer, Visitable {
+public abstract class Cardinality implements Observer, Generable {
     private Entity entity;
     private Relationship relationship;
     private int min;
@@ -81,6 +80,22 @@ public abstract class Cardinality implements Observer, Visitable {
         to.setRelationship(from.getRelationship());
 
         return to;
+    }
+    public static Cardinality factoryByType(Cardinality c) {
+        Cardinality temp;
+        if(c instanceof Many) {
+            temp = new Many();
+        }
+        else if(c instanceof OneOrMore ) {
+            temp = new OneOrMore();
+        }
+        else if(c instanceof One) {
+            temp = new One();
+        }
+        else {
+            temp = new OnlyOne();
+        }
+        return temp;
     }
     @Override
     public abstract String accept(Database database);

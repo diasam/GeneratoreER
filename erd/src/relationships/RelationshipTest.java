@@ -37,7 +37,7 @@ class RelationshipTest {
         Entity e2 = new Entity();
         e2.setName("Entita2");
 
-        e1.addPrimaryKey(new PrimaryKey("Id_Entita1", new TInteger()));
+        e1.addPrimaryKey(new PrimaryKey("Id_Entita1", new TInteger(), e1));
 
         Cardinality c1 = new Many();
         c1.setEntity(e1);
@@ -64,9 +64,9 @@ class RelationshipTest {
 
 
         erd.getRelationshipTables().get(0).getPrimaryKeys().stream().forEach(System.out::println);
-        e2.addPrimaryKey(new PrimaryKey("PK1", new TInteger()));
+        e2.addPrimaryKey(new PrimaryKey("PK1", new TInteger(),e2));
         for(int i = 0; i < 100; i++)
-            e2.addPrimaryKey(new PrimaryKey("E2_PK".concat(Integer.toString(i)), new TInteger()));
+            e2.addPrimaryKey(new PrimaryKey("E2_PK".concat(Integer.toString(i)), new TInteger(),e2));
 
         pks = erd.getRelationshipTables().get(0).getPrimaryKeys();
         fks = erd.getRelationshipTables().get(0).getForeignKeys();
@@ -84,10 +84,10 @@ class RelationshipTest {
         Entity e2 = new Entity();
         e2.setName("Entita2");
 
-        e1.addPrimaryKey(new PrimaryKey("Id_1", new TInteger()));
+        e1.addPrimaryKey(new PrimaryKey("Id_1", new TInteger(),e1));
 
         for(int i = 0; i < 100; i++)
-            e2.addPrimaryKey(new PrimaryKey("Id".concat(Integer.toString(i)), new TInteger()));
+            e2.addPrimaryKey(new PrimaryKey("Id".concat(Integer.toString(i)), new TInteger(),e2));
 
         Cardinality c1 = new One();
         c1.setEntity(e1);
@@ -110,10 +110,10 @@ class RelationshipTest {
         Entity e2 = new Entity();
         e2.setName("Entita2");
 
-        e1.addPrimaryKey(new PrimaryKey("Id_1", new TInteger()));
+        e1.addPrimaryKey(new PrimaryKey("Id_1", new TInteger(),e1));
 
         for(int i = 0; i < 100; i++)
-            e2.addPrimaryKey(new PrimaryKey("Id".concat(Integer.toString(i)), new TInteger()));
+            e2.addPrimaryKey(new PrimaryKey("Id".concat(Integer.toString(i)), new TInteger(),e2));
 
         Cardinality c1 = new One();
         c1.setEntity(e1);
@@ -121,7 +121,7 @@ class RelationshipTest {
         Cardinality c2 = new Many();
         c2.setEntity(e2);
         r.addCardinality(c2);
-        e2.addPrimaryKey(new PrimaryKey("ID", new TInteger()));
+        e2.addPrimaryKey(new PrimaryKey("ID", new TInteger(),e2));
         r.checkCardinalities();
         System.out.println(e1.getForeignKeys().size());
         assertEquals(true, e1.getForeignKeys().size() == e2.getPrimaryKeys().size());

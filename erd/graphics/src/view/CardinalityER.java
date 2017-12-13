@@ -1,19 +1,13 @@
 package view;
 
-import attributes.NormalAttribute;
-import attributes.PrimaryKey;
-import datatypes.TInteger;
 import javafx.event.ActionEvent;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import model.Erd;
 import relationships.*;
-
-import java.util.Optional;
 
 public class CardinalityER extends DiagramElement {
     protected Cardinality cardinality;
@@ -29,7 +23,7 @@ public class CardinalityER extends DiagramElement {
     protected MenuItem onlyOne;
 
     protected static final Color LINE_COLOR = Color.DARKRED;
-
+    protected static final String MANY_VALUE = "N";
     private static final double LINE_THICKNESS = 5.0f;
     public CardinalityER(Pane root, Group group, Cardinality cardinality) {
         super(root, group);
@@ -72,7 +66,6 @@ public class CardinalityER extends DiagramElement {
             if(entity != null)
                 drawPane();
             relationship.label.widthProperty().addListener((obs, oldVal, newVal) -> {
-                System.out.println("yoyo");
                 line.setStartX(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinX()
                         - root.localToScene(root.getLayoutBounds()).getMinX()
                         + relationship.group.localToScene(relationship.group.getLayoutBounds()).getWidth() / 2);
@@ -121,26 +114,29 @@ public class CardinalityER extends DiagramElement {
         int min = cardinality.getMin();
         int max = cardinality.getMax();
 
-        c1.setText((min == Cardinality.MANY_CARD ? "N" : String.valueOf(min))
+        c1.setText((min == Cardinality.MANY_CARD ? MANY_VALUE : String.valueOf(min))
                 + "-"
-                + (max == Cardinality.MANY_CARD ? "N" : String.valueOf(max)));
+                + (max == Cardinality.MANY_CARD ? MANY_VALUE : String.valueOf(max)));
     }
     private void replaceCardinality(Cardinality newCardinality) {
-        System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
-        cardinality.getRelationship().getLinks().remove(cardinality);
-        cardinality = Cardinality.copyCardinality(cardinality, newCardinality);
-        cardinality.getRelationship().getLinks().add(cardinality);
-        entity.entity.changed();
-        System.out.println("Changed:\t\t\t"+(relationship.relationship.getLinks().stream().anyMatch(cardinality1 -> cardinality1.equals(cardinality))));
-        System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
-        erd.getRelationships().forEach((relationship) -> relationship.getLinks().forEach((cardinality) -> System.out.println(cardinality.getEntity())));
+        //if(relationship.relationship.getLinks().size() > 2 && newCardinality.getClass().equals(relationship.relationship.getLinks().get(0))) {
+            System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
+            cardinality.getRelationship().getLinks().remove(cardinality);
+            cardinality = Cardinality.copyCardinality(cardinality, newCardinality);
+            cardinality.getRelationship().getLinks().add(cardinality);
+            entity.entity.changed();
+            System.out.println("Changed:\t\t\t"+(relationship.relationship.getLinks().stream().anyMatch(cardinality1 -> cardinality1.equals(cardinality))));
+            System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
+            erd.getRelationships().forEach((relationship) -> relationship.getLinks().forEach((cardinality) -> System.out.println(cardinality.getEntity())));
 
-        System.out.println(cardinality.getClass());
-        System.out.println("CIAO");
-        System.out.println(relationship.relationship.getLinks().contains(cardinality));
-        relationship.relationship.getLinks().forEach(x->System.out.println(x.getEntity().getName()));
-        System.out.println("CIAO");
-        resetTextLabel();
+            System.out.println(cardinality.getClass());
+            System.out.println("CIAO");
+            System.out.println(relationship.relationship.getLinks().contains(cardinality));
+            relationship.relationship.getLinks().forEach(x->System.out.println(x.getEntity().getName()));
+            System.out.println("CIAO");
+            resetTextLabel();
+        //}
+
     }
     private void initializeMenuEvents() {
         many.setOnAction(event -> {
@@ -156,7 +152,9 @@ public class CardinalityER extends DiagramElement {
             replaceCardinality(new OnlyOne());
         });
         line.setOnContextMenuRequested(event -> {
-            contextMenu.show(line, event.getScreenX(), event.getScreenY());
+            if(relationship.relationship.getLinks().size() <= 2) {
+                contextMenu.show(line, event.getScreenX(), event.getScreenY());
+            }
         });
     }
     private void initializeMenu() {
@@ -192,8 +190,9 @@ public class CardinalityER extends DiagramElement {
     }
 
     @Override
-    protected void deleteChildrens() {
-        children.forEach(DiagramElement::deleteChildrens);
+    protected void deleteChildren() {
+        children.forEach(DiagramElement::deleteChildren);
         root.getChildren().removeAll(line, c1);
+        relationship.relationship.getLinks().remove(cardinality);
     }
 }

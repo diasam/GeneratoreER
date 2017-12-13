@@ -1,9 +1,9 @@
 package datatypes;
 
 import database.Database;
-import database.Visitable;
+import database.Generable;
 
-public abstract class DataType implements Visitable{
+public abstract class DataType implements Generable {
     private final String name;
     public DataType(String name) {
         this.name = name;

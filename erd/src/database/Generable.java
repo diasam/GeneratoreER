@@ -1,5 +1,5 @@
 package database;
 
-public interface Visitable {
+public interface Generable {
     String accept(Database database);
 }

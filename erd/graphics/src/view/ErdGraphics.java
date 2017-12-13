@@ -31,7 +31,6 @@ public class ErdGraphics extends Application {
         primaryStage.setTitle("ERD");
         primaryStage.setScene(new Scene(page));
         primaryStage.show();
-
     }
 
 
