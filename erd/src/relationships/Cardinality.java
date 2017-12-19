@@ -70,7 +70,6 @@ public abstract class Cardinality implements Observer, Generable {
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("updating");
         if(relationship != null) {
             relationship.checkCardinalities();
         }

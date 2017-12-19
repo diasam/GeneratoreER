@@ -25,6 +25,7 @@ public class GraphicsRootController {
     @FXML
     private Pane erPane;
 
+
     private Erd erd = new Erd("Noname");
     private Scene scene;
 
@@ -39,7 +40,7 @@ public class GraphicsRootController {
     @FXML
     private void initialize() {
         erPane.setOnMouseClicked((e) -> {
-            if(e.isShiftDown()) {
+            if(e.isControlDown()) {
                 if (e.getButton().compareTo(MouseButton.PRIMARY) == 0) {
                     EntityER entityEr = new EntityER(erPane, erd);
                     entityEr.getGroup().relocate(e.getX(), e.getY());
@@ -59,12 +60,16 @@ public class GraphicsRootController {
 
             }
         });
-        /*erPane.getChildren().addListener((ListChangeListener<? super Node>) (observable) -> {
-            observable.getAddedSubList().stream()
-                    .forEach(());
-
-        });
-*/
+    }
+    @FXML
+    private void addEntityER() {
+        EntityER entityEr = new EntityER(erPane, erd);
+        entityEr.getGroup().relocate((erPane.getLayoutX() + erPane.getWidth())/2, (erPane.getLayoutY() + erPane.getHeight())/2 );
+    }
+    @FXML
+    private void addRelationshipER() {
+        RelationshipER r = new RelationshipER(erPane, erd);
+        r.getGroup().relocate((erPane.getLayoutX() + erPane.getWidth())/2, (erPane.getLayoutY() + erPane.getHeight())/2 );
     }
     @FXML
     private void exportImage() {

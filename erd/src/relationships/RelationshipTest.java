@@ -71,7 +71,6 @@ class RelationshipTest {
         pks = erd.getRelationshipTables().get(0).getPrimaryKeys();
         fks = erd.getRelationshipTables().get(0).getForeignKeys();
 
-        //assertTrue(fks.containsAll(pks), "Foreign keys should point to the primary keys");
         assertTrue(fks.size() == pks.size());
     }
     private void checkOneOne() {

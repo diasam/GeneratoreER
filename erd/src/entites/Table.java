@@ -5,7 +5,7 @@ import database.Generable;
 
 import java.util.List;
 
-public interface Table extends Comparable<Table>, Generable {
+public interface Table extends Generable {
     String getName();
     void setName(String name);
     List<Attribute> getNormalAttributes();

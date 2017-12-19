@@ -24,15 +24,15 @@ public class Sql extends Database {
     }
     @Override
     public String getScript(Erd erd) {
-        erd.getRelationshipTables().stream().map(x -> script.getOrDefault(x, "not defined")).forEach(System.out::println);
-        Stream.concat(erd.getEntities().stream(), erd.getRelationshipTables().stream()).forEach((x) -> {
+        //erd.getRelationshipTables().stream().map(x -> script.getOrDefault(x, "not defined")).forEach(System.out::println);
+        Stream.concat(erd.getTables().stream(), erd.getRelationshipTables().stream()).forEach((x) -> {
                 removeLast(x);
                 newLine(x);
                 append(x, ");");
 
         });
         return script.get(erd)
-                .concat(erd.getEntities().stream()
+                .concat(erd.getTables().stream()
                         .map((x) -> script.get(x))
                         .reduce("", Sql::concat))
                 .concat(erd.getRelationshipTables().stream()
@@ -49,17 +49,52 @@ public class Sql extends Database {
 
     @Override
     public String generate(PrimaryKey primaryKey) {
+        //append(primaryKey.getTable(), primaryKey.getName().concat("")
+        //        .concat(primaryKey.getDataType().accept(this)));
         return ""
-                .concat(primaryKey.getName().concat(" "))
-                .concat(primaryKey.getDataType().accept(this))
-                .concat(", PRIMARY KEY("
-                .concat(primaryKey.getName()
-                .concat(")")));
+                //.concat(primaryKey.getName().concat(" "))
+                //.concat(primaryKey.getDataType().accept(this))
+                //.concat(", PRIMARY KEY(")
+                .concat(primaryKey.getName());
+                //.concat(")");
+
+        //return primaryKey.getName();
     }
 
     @Override
     public String generate(ForeignKey foreignKey) {
-        return foreignKey.getName().concat(" ")
+
+
+        return !foreignKey.isPrimaryKey()
+                ? "FOREIGN KEY ("
+                    .concat(foreignKey.getName())
+                    .concat(") REFERENCES ")
+                    .concat(foreignKey.getReference().getName())
+                    .concat("(")
+                    .concat(foreignKey.getName()
+                    .concat(")"))
+                : foreignKey.getName().concat(" ")
+                    .concat(foreignKey.getDataType().accept(this))
+                    .concat(" ")
+                    .concat(foreignKey.getName().concat(",\n\t"))
+                    //TODO Documentare bug
+                    //.concat(foreignKey.getDataType().accept(this))
+                    //.concat(", ")
+                    .concat("FOREIGN KEY (")
+                    .concat(foreignKey.getName())
+                    .concat(") REFERENCES ")
+                    .concat(foreignKey.getReference().getName())
+                    .concat("(")
+                    .concat(foreignKey.getName()
+                    .concat(")"));
+
+
+        // last
+        /*
+        return  foreignKey.getName().concat(" ")
+                .concat(foreignKey.getDataType().accept(this))
+                .concat(" ")
+                .concat(",\n\t")
                 //TODO Documentare bug
                 //.concat(foreignKey.getDataType().accept(this))
                 //.concat(", ")
@@ -70,6 +105,7 @@ public class Sql extends Database {
                 .concat("(")
                 .concat(foreignKey.getName()
                 .concat(")"));
+                */
         /*
         append(foreignKey, foreignKey.getName().concat(" "));
         foreignKey.getDataType().accept(this);
@@ -91,7 +127,7 @@ public class Sql extends Database {
         newLine(erd);
         append(erd, "use ". concat(erd.getName()).concat(";"));
         newLine(erd);
-        erd.getEntities().stream().filter((x) -> x.getDependencies().size() == 0)
+        erd.getTables().stream().filter((x) -> x.getDependencies().size() == 0)
                 .forEach((x) -> {
                     x.accept(this);
                 });
@@ -121,15 +157,29 @@ public class Sql extends Database {
                 newLine(entity);
                 done = false;
             }
+
+            entity.getPrimaryKeys().stream().forEach(pk -> append(entity, pk.getName().concat(" ")
+                    .concat(pk.getDataType().accept(this))
+                    .concat(", \n\t")));
+            removeLast(entity);
+
+            append(entity, "PRIMARY KEY (");
             entity.getPrimaryKeys().stream().forEach((x) -> {
                 append(entity, x.accept(this).concat(","));
                 done = true;
             });
+            removeLast(entity);
+            append(entity,"),");
             if (done) {
                 newLine(entity);
                 done = false;
             }
+
             entity.getForeignKeys().stream().forEach((x) -> {
+                if (!script.get(entity).contains(x.getName() + " " + x.getDataType()))
+                    append(entity, x.getName().concat(" ")
+                            .concat(x.getDataType().accept(this))
+                            .concat(", \n\t"));
                 append(entity, x.accept(this).concat(","));
                 done = true;
             });
@@ -150,8 +200,8 @@ public class Sql extends Database {
         Entity e1 = new Entity();
         Entity e2 = new Entity();
 
-        erd.addEntity(e1);
-        erd.addEntity(e2);
+        erd.addTable(e1);
+        erd.addTable(e2);
 
         Relationship r = new Relationship(erd);
         erd.addRelationship(r);
@@ -176,8 +226,8 @@ public class Sql extends Database {
         e4.setName("Entity4");
         e4.addPrimaryKey(new PrimaryKey("PrimaryKeyProva", new TInteger(),e4));
         Relationship r2 = new Relationship(erd);
-        erd.addEntity(e3);
-        erd.addEntity(e4);
+        erd.addTable(e3);
+        erd.addTable(e4);
         erd.addRelationship(r2);
         Cardinality c3 = new OnlyOne();
         Cardinality c4 = new Many();
@@ -188,7 +238,7 @@ public class Sql extends Database {
         r2.addCardinality(c4);
         Entity e5 = new Entity();
         e5.setName("no_dep");
-        erd.addEntity(e5);
+        erd.addTable(e5);
         e5.addNormalAttribute(new NormalAttribute("Prova", new TInteger(),e5));
         d.generate(erd);
         System.out.println(d.getScript(erd));
@@ -247,6 +297,7 @@ public class Sql extends Database {
 
     @Override
     public String generate(Relationship relationship) {
+        relationship.checkCardinalities();
         System.out.println("Generazione relazione, numero collegamenti: \t\t\t\t"+relationship.getLinks().size());
         relationship.getLinks().stream()
                 .forEach(cardinality -> System.out.println("Generazione relazioni: \t\t\t\t"+cardinality.getEntity().getName()));

@@ -3,7 +3,7 @@ package datatypes;
 import database.Database;
 
 public class TVarchar extends DataType implements Sizeable {
-    private int size = 0;
+    private int size = 32;
     public TVarchar(){
         super("Varchar");
     }

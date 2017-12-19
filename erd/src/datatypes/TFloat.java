@@ -3,7 +3,7 @@ package datatypes;
 import database.Database;
 
 public class TFloat extends DataType implements Sizeable{
-    private int size = 0;
+    private int size = 32;
     @Override
     public int getSize() {
         return size;

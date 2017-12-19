@@ -28,11 +28,4 @@ public class ChronoEvents {
     public ObservableList<DiagramElement> getEvents() {
         return events;
     }
-    /*
-    public static void main(String[] args) {
-        ChronoEvents.getInstance().getEvents().addListener((ListChangeListener)(c -> {
-            c.getList().stream().forEach(System.out::println);
-        }));
-    }
-    */
 }

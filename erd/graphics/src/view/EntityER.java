@@ -45,7 +45,7 @@ public class EntityER extends DiagramElement {
             , Erd erd) {
         super(root, erd);
         this.entity = entity;
-        erd.addEntity(entity);
+        erd.addTable(entity);
         initializeEntity();
         initializeMenu();
         drawPane();
@@ -61,7 +61,7 @@ public class EntityER extends DiagramElement {
     private void initializeEntityEvents() {
         entityName.textProperty().addListener((obs, oldVal, newVal) -> {
             entity.setName(newVal);
-            System.out.println(entity.getName());
+            //System.out.println(entity.getName());
         });
         entityName.widthProperty().addListener((obs, oldVal, newVal) -> {
             if(entityRect.getWidth() < newVal.doubleValue())
@@ -83,7 +83,7 @@ public class EntityER extends DiagramElement {
                                 - entityRect.getHeight() / 2);
         });
         group.setOnMouseClicked(e -> {
-            if(e.getButton().compareTo(MouseButton.PRIMARY) == 0 && e.isMetaDown()) {
+            if(e.getButton().compareTo(MouseButton.PRIMARY) == 0 && e.isShiftDown()) {
                 ChronoEvents.getInstance().getEvents().add(this);
 
             }
@@ -154,6 +154,6 @@ public class EntityER extends DiagramElement {
     protected void deleteChildren() {
         children.forEach(x -> x.deleteChildren());
         root.getChildren().remove(group);
-        erd.getEntities().remove(entity);
+        erd.getTables().remove(entity);
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Erd implements Generable {
     public String name;
-    private final List<Table> entities;
+    private final List<Table> tables;
     private final List<Relationship> relationships;
     private final List<Table> relationshipTables;
     public Erd(String name) {
@@ -21,25 +21,25 @@ public class Erd implements Generable {
         this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), "undefined");
     }
 
-    public Erd(List<Table> entities, List<Relationship> relationships, List<Table> relationshipTables, String name) {
-        this.entities = entities;
+    public Erd(List<Table> tables, List<Relationship> relationships, List<Table> relationshipTables, String name) {
+        this.tables = tables;
         this.relationships = relationships;
         this.relationshipTables = relationshipTables;
         this.name = name;
     }
 
-    public List<Table> getEntities() {
+    public List<Table> getTables() {
         orderEntities();
-        return entities;
+        return tables;
     }
 
     private void orderEntities() {
         Table e;
-        for(int i = 0; i < entities.size(); i++) {
-            e = entities.get(i);
-            for(int j = i + 1; j < entities.size(); j++) {
-                if(e.getDependencies().contains(entities.get(j))) {
-                    Collections.swap(entities, i, j);
+        for(int i = 0; i < tables.size(); i++) {
+            e = tables.get(i);
+            for(int j = i + 1; j < tables.size(); j++) {
+                if(e.getDependencies().contains(tables.get(j))) {
+                    Collections.swap(tables, i, j);
                 }
             }
         }
@@ -53,14 +53,11 @@ public class Erd implements Generable {
 
 
     public List<Table> getRelationshipTables() {
-        System.out.print("ABC\t\t");
-        relationshipTables.stream().map(Table::getPrimaryKeys).forEach(System.out::println);
-        //relationshipTables.stream().map(Table::getPrimaryKeys).collect(Collectors.toList()).forEach(System.out::println);
         return relationshipTables;
     }
 
-    public void addEntity(Table entity) {
-        entities.add(entity);
+    public void addTable(Table table) {
+        tables.add(table);
     }
     public void addRelationship(Relationship relationship) {
         relationships.add(relationship);

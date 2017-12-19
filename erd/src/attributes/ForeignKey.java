@@ -6,6 +6,7 @@ import entites.Table;
 
 public class ForeignKey extends Attribute {
     private Table reference;
+    private boolean isPrimaryKey = false;
     public ForeignKey(String name, DataType dataType, Table table) {
         super(name, dataType, table);
     }
@@ -20,6 +21,14 @@ public class ForeignKey extends Attribute {
 
     public void setReference(Table reference) {
         this.reference = reference;
+    }
+
+    public boolean isPrimaryKey() {
+        return isPrimaryKey;
+    }
+
+    public void setPrimaryKey(boolean primaryKey) {
+        isPrimaryKey = primaryKey;
     }
 
     @Override

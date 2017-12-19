@@ -15,6 +15,8 @@ import model.Erd;
 import relationships.Cardinality;
 import relationships.Relationship;
 
+import java.util.Optional;
+
 public class RelationshipER extends DiagramElement {
 
 
@@ -89,8 +91,7 @@ public class RelationshipER extends DiagramElement {
                                 - group.localToScene(group.getLayoutBounds()).getHeight() / 2);
         });
         group.setOnMouseClicked(e -> {
-            if(e.getButton().compareTo(MouseButton.PRIMARY) == 0 && e.isMetaDown()) {
-                //System.out.println(e);
+            if(e.getButton().compareTo(MouseButton.PRIMARY) == 0 && e.isShiftDown()) {
                 CardinalityER c = new CardinalityER(root, erd);
 
                 if(relationship.addCardinality(c.cardinality)) {
@@ -101,7 +102,6 @@ public class RelationshipER extends DiagramElement {
                             if(x instanceof EntityER) {
                                 c.setEntity((EntityER) x);
                             }
-                            //ChronoEvents.getInstance().getEvents().stream().forEach(System.out::println);
                         });
                     };
                     ChronoEvents.getInstance().getEvents().addListener(listener);
@@ -120,7 +120,6 @@ public class RelationshipER extends DiagramElement {
                                 if(x instanceof EntityER) {
                                     c.setEntity((EntityER) x);
                                 }
-                                //ChronoEvents.getInstance().getEvents().stream().forEach(System.out::println);
                             });
                         };
                         ChronoEvents.getInstance().getEvents().addListener(listener);
@@ -167,19 +166,21 @@ public class RelationshipER extends DiagramElement {
 
         pk.setOnAction(event -> {
             PrimaryKey primaryKey = new PrimaryKey(new TInteger(), relationship.getTable());
-            relationship.getAttributes().add(primaryKey);
+            relationship.addAttribute(primaryKey);
             attributesFactory.create(root
                     , group
                     , primaryKey);
             addLastFromFactory();
+            attributesFactory.getLast().relationshipER = Optional.ofNullable(this);
         });
         att.setOnAction(event -> {
             NormalAttribute na = new NormalAttribute(new TInteger(), relationship.getTable());
-            relationship.getAttributes().add(na);
+            relationship.addAttribute(na);
             attributesFactory.create(root
                     , group
                     , na);
             addLastFromFactory();
+            attributesFactory.getLast().relationshipER = Optional.ofNullable(this);
         });
         delete.setOnAction((ActionEvent event) -> {
             deleteChildren();
@@ -204,7 +205,6 @@ public class RelationshipER extends DiagramElement {
 
     }
     private void addLastFromFactory() {
-        //children.add(attributesFactory.getAttributes().get(attributesFactory.getAttributes().size()-1));
         children.add(attributesFactory.getLast());
     }
 }

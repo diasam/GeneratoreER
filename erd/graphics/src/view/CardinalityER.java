@@ -120,20 +120,20 @@ public class CardinalityER extends DiagramElement {
     }
     private void replaceCardinality(Cardinality newCardinality) {
         //if(relationship.relationship.getLinks().size() > 2 && newCardinality.getClass().equals(relationship.relationship.getLinks().get(0))) {
-            System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
+            //System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
             cardinality.getRelationship().getLinks().remove(cardinality);
             cardinality = Cardinality.copyCardinality(cardinality, newCardinality);
             cardinality.getRelationship().getLinks().add(cardinality);
             entity.entity.changed();
-            System.out.println("Changed:\t\t\t"+(relationship.relationship.getLinks().stream().anyMatch(cardinality1 -> cardinality1.equals(cardinality))));
-            System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
-            erd.getRelationships().forEach((relationship) -> relationship.getLinks().forEach((cardinality) -> System.out.println(cardinality.getEntity())));
+            //System.out.println("Changed:\t\t\t"+(relationship.relationship.getLinks().stream().anyMatch(cardinality1 -> cardinality1.equals(cardinality))));
+            //System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
+            //erd.getRelationships().forEach((relationship) -> relationship.getLinks().forEach((cardinality) -> System.out.println(cardinality.getEntity())));
 
-            System.out.println(cardinality.getClass());
-            System.out.println("CIAO");
-            System.out.println(relationship.relationship.getLinks().contains(cardinality));
-            relationship.relationship.getLinks().forEach(x->System.out.println(x.getEntity().getName()));
-            System.out.println("CIAO");
+            //System.out.println(cardinality.getClass());
+            //System.out.println("CIAO");
+            //System.out.println(relationship.relationship.getLinks().contains(cardinality));
+            //relationship.relationship.getLinks().forEach(x->System.out.println(x.getEntity().getName()));
+            //System.out.println("CIAO");
             resetTextLabel();
         //}
 

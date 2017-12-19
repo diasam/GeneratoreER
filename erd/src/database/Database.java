@@ -68,7 +68,6 @@ public abstract class Database {
 
     }
     public abstract String getScript(Erd erd);
-
     public abstract String generate(Erd erd);
     public abstract String generate(Entity entity);
     public abstract String generate(NormalAttribute normalAttribute);

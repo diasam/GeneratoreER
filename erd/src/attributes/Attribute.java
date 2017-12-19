@@ -4,6 +4,8 @@ import database.Generable;
 import datatypes.DataType;
 import entites.Table;
 
+import java.util.Optional;
+
 public abstract class Attribute implements Generable {
     private String name;
     private DataType dataType;
@@ -48,5 +50,11 @@ public abstract class Attribute implements Generable {
 
     }
 
+    public Table getTable() {
+        return table;
+    }
 
+    public void setTable(Table table) {
+        this.table = table;
+    }
 }

@@ -14,13 +14,6 @@ import java.util.Optional;
 
 public class ErdGraphics extends Application {
     public static void main(String[] args) {
-        Map<String, String> m = new HashMap<>();
-        m.put("prova", "prova2");
-        m.put("prova", "prova3");
-        Optional.ofNullable(null)
-                .ifPresent(element -> System.out.println(element));
-
-        //System.out.print(m.get("prova"));
         launch(args);
     }
 

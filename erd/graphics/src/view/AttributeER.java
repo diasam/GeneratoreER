@@ -12,6 +12,7 @@ import javafx.scene.shape.Line;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 public abstract class AttributeER extends DiagramElement{
@@ -21,6 +22,7 @@ public abstract class AttributeER extends DiagramElement{
     protected Label label;
     protected Line line;
 
+    protected Optional<RelationshipER> relationshipER = Optional.empty();
     private ContextMenu contextMenu;
     private Menu changeType;
 
@@ -193,6 +195,7 @@ public abstract class AttributeER extends DiagramElement{
     @Override
     protected void deleteChildren() {
         attribute.remove();
+        relationshipER.ifPresent(r -> r.relationship.removeAttribute(attribute));
         children.forEach(x -> x.deleteChildren());
         root.getChildren().removeAll(group, line);
     }

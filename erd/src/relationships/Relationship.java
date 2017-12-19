@@ -8,7 +8,6 @@ import entites.Table;
 import model.Erd;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Relationship implements Generable {
@@ -17,6 +16,9 @@ public class Relationship implements Generable {
     private final List<Attribute> attributes;
     private String name;
     private Table table;
+
+    private boolean dependency = false;
+
     public Relationship(Erd erd) {
         this(new ArrayList<>(), new ArrayList<>(), "Relationship", erd);
     }
@@ -29,49 +31,58 @@ public class Relationship implements Generable {
     public List<Cardinality> getLinks() {
         return links;
     }
-
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
     public Erd getErd() {
         return erd;
     }
-
     private void setCardinalityOneMore() {
-        removeTable();
+        /*removeTable();
         links.stream()
-            .filter((x) -> x instanceof One || x instanceof OnlyOne)
+            .filter((cardinality) -> cardinality instanceof One || cardinality instanceof OnlyOne)
             .findFirst()
             .ifPresent((one) ->
                 links.stream()
-                        .filter((x) -> x instanceof Many || x instanceof OneOrMore)
+                        .filter((cardinality) -> cardinality instanceof Many || cardinality instanceof OneOrMore)
                         .findFirst()
                         .ifPresent((many) -> {
-                            if(attributes.size() > 0) {
+                            if(attributes.size() > 0)
                                 createTable(  new Entity(getName()
                                             , attributes
                                             , one.getEntity().getPrimaryKeys()
                                             , links.stream()
-                                                .map((x) -> x.getEntity())
+                                                .map((cardinality) -> cardinality.getEntity())
                                                 .collect(Collectors.toList())));
-                            }
-                            else {
-                                System.out.println("One:\t\t"+(one.getEntity()==null));
-                                System.out.println("Many:\t\t"+(many.getEntity()==null));
 
-                                Optional.ofNullable(one.getEntity())
-                                        .ifPresent((entity -> one.getEntity().addDependency(entity)));
-                                //one.getEntity().addDependency(many.getEntity());
-                            }
+                            else
+                                Optional.ofNullable(many.getEntity())
+                                        .ifPresent((entityM ->
+                                                Optional.ofNullable(one.getEntity()).ifPresent(entityO ->
+                                                        entityO.addDependency(entityM))
+                                        ));
                         })
         );
-
-
+        dependency = true;
+        */
+        removeTable();
+        links.stream()
+                .filter((cardinality) -> cardinality instanceof One || cardinality instanceof OnlyOne)
+                .findFirst()
+                .ifPresent((one) ->
+                        links.stream()
+                                .filter((cardinality) -> cardinality instanceof Many || cardinality instanceof OneOrMore)
+                                .findFirst()
+                                .ifPresent((many) -> Optional.ofNullable(many.getEntity())
+                                    .ifPresent(entityM ->
+                                        Optional.ofNullable(one.getEntity()).ifPresent(entityO ->
+                                            entityO.addDependency(entityM))
+                                    ))
+                );
+        dependency = true;
     }
     protected void createTable(Table t) {
         removeTable();
@@ -79,20 +90,26 @@ public class Relationship implements Generable {
         table = t;
     }
     private void setCardinalityManyMany() {
-        final AtomicInteger i = new AtomicInteger(0);
         removeTable();
         List<Attribute> pks = new ArrayList<>();
         List<Table> dependencies = new ArrayList<>(links.size());
-        links.stream().forEach((x) -> {
-            if(x.getEntity() != null ) {
-                pks.addAll(x.getEntity().getPrimaryKeys() );
-                dependencies.add(
-                        x.getEntity());
-                System.out.println(i.getAndIncrement());
-            }
-
-        });
+        links.stream()
+                .filter(cardinality -> cardinality.getEntity() != null)
+                .forEach((cardinality) -> {
+                    pks.addAll(cardinality.getEntity().getPrimaryKeys() );
+                    dependencies.add(cardinality.getEntity());
+                });
         createTable( new Entity(getName(), attributes, pks, dependencies));
+        if(dependency) {
+            for(int i = 0; i < links.size(); i++) {
+                Cardinality tmp = links.get(i);
+                for(int j = 0; j < links.size(); j++) {
+                    tmp.getEntity().getDependencies().remove(links.get(j).getEntity());
+                }
+
+            }
+        }
+        dependency = false;
     }
     private void removeTable() {
         if(table != null) {
@@ -102,7 +119,6 @@ public class Relationship implements Generable {
     }
     private void setCardinalityOneToOne() {
         removeTable();
-        //links.stream().forEach(x -> System.out.println(x.getEntity()));
         setOneToOneFk(links.get(0).getEntity());
     }
     public void setOneToOneFk(Table t){
@@ -112,6 +128,8 @@ public class Relationship implements Generable {
                 .filter((x) -> !x.getEntity().equals(t))
                 .findFirst()
                 .ifPresent(cardinality -> t.addDependency(cardinality.getEntity()));
+
+        dependency = true;
 
     }
     public boolean addCardinality(Cardinality cardinality) {
@@ -124,26 +142,20 @@ public class Relationship implements Generable {
             flag = true;
         }
 
-        else if(links.stream().allMatch(x -> x.getClass().equals(c))
-                && links.stream().allMatch(x -> x instanceof Many || x instanceof OneOrMore)) {
+        else if(links.stream().allMatch(cardinalityConsumer -> cardinalityConsumer.getClass().equals(c))
+                && links.stream().allMatch(cardinalityConsumer -> cardinalityConsumer instanceof Many || cardinalityConsumer instanceof OneOrMore)) {
             links.add(cardinality);
             flag = true;
         }
-        /*
-        if(links.size() < 2 || links.stream().allMatch((x) -> x.getClass().equals(c))) {
-            links.add(cardinality);
+        //System.out.println("Flag: \t\t\t"+flag);
+        if(flag)
             checkCardinalities();
-            flag = true;
-        }
-        */
-        System.out.println("Flag: \t\t\t"+flag);
         return flag;
     }
     public void removeCardinality(Cardinality cardinality) {
         links.remove(cardinality);
     }
     public void checkCardinalities() {
-        System.out.println("Size:\t" + (links.size()));
         if(links.size() > 1 && erd != null) {
             int cnt = 0;
             for(Cardinality c : links) {
@@ -162,7 +174,11 @@ public class Relationship implements Generable {
              * Relazione uno-molti
              */
             else if(cnt > 0) {
-                setCardinalityOneMore();
+                //System.out.println("asdkhjadsfh is: \t\t"+attributes.isEmpty());
+                if (attributes.isEmpty())
+                   setCardinalityOneMore();
+                else
+                    setCardinalityManyMany();
             }
             /**
              * Relazione Uno-Uno
@@ -173,19 +189,23 @@ public class Relationship implements Generable {
             System.out.println("Cnt is: \t\t"+cnt);
         }
     }
-
-    public List<Attribute> getAttributes() {
-        return attributes;
+    public void addAttribute(Attribute attribute) {
+        attributes.add(attribute);
+        checkCardinalities();
     }
-
+    public void removeAttribute(Attribute attribute) {
+        attributes.remove(attribute);
+        checkCardinalities();
+    }
+    public List<Attribute> getAttributes() {
+        return Collections.unmodifiableList(attributes);
+    }
     public Table getTable() {
         return table;
     }
-
     public void setTable(Table table) {
         this.table = table;
     }
-
     @Override
     public String accept(Database database) {
         return database.generate(this);
