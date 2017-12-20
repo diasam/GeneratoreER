@@ -41,7 +41,8 @@ public class Sql extends Database {
     }
     @Override
     public String generate(NormalAttribute normalAttribute) {
-        System.out.println(normalAttribute.getName());
+        System.out.println(normalAttribute.getName().concat(" ")
+                .concat(normalAttribute.getDataType().accept(this)));
         return normalAttribute.getName().concat(" ")
                 .concat(normalAttribute.getDataType().accept(this));
 
@@ -147,9 +148,8 @@ public class Sql extends Database {
             addIndentation(entity);
             indent(entity);
             newLine(entity);
-            //entity.getNormalAttributes().stream().forEach(x -> System.out.println(x.getName()));
-            entity.getNormalAttributes().stream().forEach((x) -> {
-                append(entity, x.accept(this).concat(","));
+            entity.getNormalAttributes().stream().forEach((normalAttribute) -> {
+                append(entity, normalAttribute.accept(this).concat(","));
                 done = true;
 
             });
@@ -158,14 +158,14 @@ public class Sql extends Database {
                 done = false;
             }
 
-            entity.getPrimaryKeys().stream().forEach(pk -> append(entity, pk.getName().concat(" ")
-                    .concat(pk.getDataType().accept(this))
+            entity.getPrimaryKeys().stream().forEach(primaryKey -> append(entity, primaryKey.getName().concat(" ")
+                    .concat(primaryKey.getDataType().accept(this))
                     .concat(", \n\t")));
             removeLast(entity);
 
             append(entity, "PRIMARY KEY (");
-            entity.getPrimaryKeys().stream().forEach((x) -> {
-                append(entity, x.accept(this).concat(","));
+            entity.getPrimaryKeys().stream().forEach((primaryKey) -> {
+                append(entity, primaryKey.accept(this).concat(","));
                 done = true;
             });
             removeLast(entity);
@@ -175,12 +175,12 @@ public class Sql extends Database {
                 done = false;
             }
 
-            entity.getForeignKeys().stream().forEach((x) -> {
-                if (!script.get(entity).contains(x.getName() + " " + x.getDataType()))
-                    append(entity, x.getName().concat(" ")
-                            .concat(x.getDataType().accept(this))
+            entity.getForeignKeys().stream().forEach((foreignKey) -> {
+                if (!script.get(entity).contains(foreignKey.getName() + " " + foreignKey.getDataType()))
+                    append(entity, foreignKey.getName().concat(" ")
+                            .concat(foreignKey.getDataType().accept(this))
                             .concat(", \n\t"));
-                append(entity, x.accept(this).concat(","));
+                append(entity, foreignKey.accept(this).concat(","));
                 done = true;
             });
             if (done) {
@@ -276,42 +276,38 @@ public class Sql extends Database {
 
     @Override
     public String generate(OnlyOne onlyOne) {
-        onlyOne.getEntity().accept(this);
-        Entity e = onlyOne.getEntity();
-        addIndentation(e);
-        indent(e);
-        onlyOne.getEntity().getForeignKeys().stream()
-                .forEach((x) -> {
-                    addIndentation(e);
-                    indent(e);
-                    append(e,"constraint check ");
-                    append(e,"(");
-                    append(e,x.getName());
-                    append(e," is not null");
-                    append(e,"),");
-                    newLine(e);
-                });
-        subIndentation(e);
+        if(onlyOne != null && onlyOne.getEntity() != null) {
+            onlyOne.getEntity().accept(this);
+            Entity e = onlyOne.getEntity();
+            addIndentation(e);
+            indent(e);
+            onlyOne.getEntity().getForeignKeys().stream()
+                    .forEach((x) -> {
+                        addIndentation(e);
+                        indent(e);
+                        append(e, "constraint check ");
+                        append(e, "(");
+                        append(e, x.getName());
+                        append(e, " is not null");
+                        append(e, "),");
+                        newLine(e);
+                    });
+            subIndentation(e);
+        }
         return "";
     }
 
     @Override
     public String generate(Relationship relationship) {
         relationship.checkCardinalities();
-        System.out.println("Generazione relazione, numero collegamenti: \t\t\t\t"+relationship.getLinks().size());
-        relationship.getLinks().stream()
-                .forEach(cardinality -> System.out.println("Generazione relazioni: \t\t\t\t"+cardinality.getEntity().getName()));
+
+        // Prima si generano le entità legate ad una cardinalità di tipo molti
         relationship.getLinks().stream()
                 .filter((x) -> x instanceof Many || x instanceof OneOrMore)
-
-                .map(cardinality -> {System.out.println("Generazione relazioni: \t\t\t\t"+cardinality.getEntity().getName()); return cardinality;})
-
                 .forEach((x) -> x.accept(this));
+        // In seguito si generano le entità legate ad una cardinalità di tipo Uno
         relationship.getLinks().stream()
                 .filter((x) -> x instanceof One || x instanceof OnlyOne)
-
-                .map(cardinality -> {System.out.println("Generazione relazioni: \t\t\t\t"+cardinality.getEntity().getName()); return cardinality;})
-
                 .forEach((x) -> x.accept(this));
         return "";
     }

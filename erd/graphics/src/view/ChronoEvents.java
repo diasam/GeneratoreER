@@ -26,6 +26,7 @@ public class ChronoEvents {
     }
 
     public ObservableList<DiagramElement> getEvents() {
+        events.forEach(x -> System.out.println(x instanceof RelationshipER ? ((RelationshipER)x).relationship.getName() : ((EntityER)x).entity.getName()));
         return events;
     }
 }

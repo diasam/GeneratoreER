@@ -85,7 +85,7 @@ public class EntityER extends DiagramElement {
         group.setOnMouseClicked(e -> {
             if(e.getButton().compareTo(MouseButton.PRIMARY) == 0 && e.isShiftDown()) {
                 ChronoEvents.getInstance().getEvents().add(this);
-
+                ChronoEvents.getInstance().getEvents().remove(this);
             }
         });
     }

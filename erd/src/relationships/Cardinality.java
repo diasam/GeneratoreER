@@ -98,4 +98,5 @@ public abstract class Cardinality implements Observer, Generable {
     }
     @Override
     public abstract String accept(Database database);
+
 }

@@ -11,4 +11,6 @@ public class Many extends Cardinality {
     public String accept(Database database) {
         return database.generate(this);
     }
+
+
 }

@@ -1,6 +1,8 @@
 package relationships;
 
 import attributes.Attribute;
+import attributes.NormalAttribute;
+import attributes.PrimaryKey;
 import database.Database;
 import database.Generable;
 import entites.Entity;
@@ -91,7 +93,9 @@ public class Relationship implements Generable {
     }
     private void setCardinalityManyMany() {
         removeTable();
-        List<Attribute> pks = new ArrayList<>();
+        List<Attribute> pks = new ArrayList<>(attributes.stream()
+                .filter(attribute -> attribute instanceof PrimaryKey)
+                .collect(Collectors.toList()));
         List<Table> dependencies = new ArrayList<>(links.size());
         links.stream()
                 .filter(cardinality -> cardinality.getEntity() != null)
@@ -99,7 +103,13 @@ public class Relationship implements Generable {
                     pks.addAll(cardinality.getEntity().getPrimaryKeys() );
                     dependencies.add(cardinality.getEntity());
                 });
-        createTable( new Entity(getName(), attributes, pks, dependencies));
+
+        createTable( new Entity( getName()
+                               , attributes.stream()
+                                    .filter(attribute -> attribute instanceof NormalAttribute)
+                                    .collect(Collectors.toList())
+                               , pks
+                               , dependencies));
         if(dependency) {
             for(int i = 0; i < links.size(); i++) {
                 Cardinality tmp = links.get(i);
@@ -122,15 +132,15 @@ public class Relationship implements Generable {
         setOneToOneFk(links.get(0).getEntity());
     }
     public void setOneToOneFk(Table t){
-        links.stream()
-                //TODO Documentare
-                .filter(x -> x.getEntity() != null)
-                .filter((x) -> !x.getEntity().equals(t))
-                .findFirst()
-                .ifPresent(cardinality -> t.addDependency(cardinality.getEntity()));
-
-        dependency = true;
-
+        if(t != null) {
+            links.stream()
+                    //TODO Documentare
+                    .filter(x -> x.getEntity() != null)
+                    .filter((x) -> !x.getEntity().equals(t))
+                    .findFirst()
+                    .ifPresent(cardinality -> t.addDependency(cardinality.getEntity()));
+            dependency = true;
+        }
     }
     public boolean addCardinality(Cardinality cardinality) {
         Class c = cardinality.getClass();
@@ -154,10 +164,15 @@ public class Relationship implements Generable {
     }
     public void removeCardinality(Cardinality cardinality) {
         links.remove(cardinality);
+        //int rType = checkCardinalities();
+        //if(rType == links.size())
+
+
     }
-    public void checkCardinalities() {
+    public int checkCardinalities() {
+        int cnt = -1;
         if(links.size() > 1 && erd != null) {
-            int cnt = 0;
+            cnt = 0;
             for(Cardinality c : links) {
                 if((c instanceof Many) || (c instanceof OneOrMore)) {
                     cnt++;
@@ -188,6 +203,7 @@ public class Relationship implements Generable {
             }
             System.out.println("Cnt is: \t\t"+cnt);
         }
+        return cnt;
     }
     public void addAttribute(Attribute attribute) {
         attributes.add(attribute);

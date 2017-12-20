@@ -35,6 +35,8 @@ public class RelationshipER extends DiagramElement {
     protected MenuItem delete;
     private TextInputDialog textInputDialog;
 
+    private ListChangeListener listener;
+
     protected static final Color BACKGROUND = Color.WHITE;
     protected static final Color STROKE = Color.BLACK;
     public RelationshipER(Pane root, Erd erd) {
@@ -93,20 +95,30 @@ public class RelationshipER extends DiagramElement {
         group.setOnMouseClicked(e -> {
             if(e.getButton().compareTo(MouseButton.PRIMARY) == 0 && e.isShiftDown()) {
                 CardinalityER c = new CardinalityER(root, erd);
-
+                children.add(c);
+                //if(listener != null) {
+                //    ChronoEvents.getInstance().getEvents().removeListener(listener);
+                //    listener = null;
+                //}
                 if(relationship.addCardinality(c.cardinality)) {
                     c.setRelationship(this);
                     ChronoEvents.getInstance().getEvents().add(this);
-                    ListChangeListener listener = (event) -> {
-                        ChronoEvents.getInstance().getLast().ifPresent(x -> {
-                            if(x instanceof EntityER) {
-                                c.setEntity((EntityER) x);
-                            }
-                        });
+                    listener = (event) -> {
+                        event.next();
+                        if(event.wasAdded()) {
+                            ChronoEvents.getInstance().getLast().ifPresent(x -> {
+                                if (x instanceof EntityER) {
+                                    c.setEntity((EntityER) x);
+                                }
+                            });
+                        }
                     };
                     ChronoEvents.getInstance().getEvents().addListener(listener);
                     ChronoEvents.getInstance().getEvents().addListener((ListChangeListener) event -> {
-                        ChronoEvents.getInstance().getEvents().removeListener(listener);
+                        if(listener != null) {
+                            ChronoEvents.getInstance().getEvents().removeListener(listener);
+                            listener = null;
+                        }
                     });
                 }
                 else {
@@ -115,16 +127,22 @@ public class RelationshipER extends DiagramElement {
                     if(relationship.addCardinality(c.cardinality)) {
                         c.setRelationship(this);
                         ChronoEvents.getInstance().getEvents().add(this);
-                        ListChangeListener listener = (event) -> {
-                            ChronoEvents.getInstance().getLast().ifPresent(x -> {
-                                if(x instanceof EntityER) {
-                                    c.setEntity((EntityER) x);
-                                }
-                            });
+                        listener = (event) -> {
+                            event.next();
+                            if(event.wasAdded()) {
+                                ChronoEvents.getInstance().getLast().ifPresent(x -> {
+                                    if (x instanceof EntityER) {
+                                        c.setEntity((EntityER) x);
+                                    }
+                                });
+                            }
                         };
                         ChronoEvents.getInstance().getEvents().addListener(listener);
                         ChronoEvents.getInstance().getEvents().addListener((ListChangeListener) event -> {
-                            ChronoEvents.getInstance().getEvents().removeListener(listener);
+                            if(listener != null) {
+                                ChronoEvents.getInstance().getEvents().removeListener(listener);
+                                listener = null;
+                            }
                         });
                     }
                 }
@@ -149,7 +167,7 @@ public class RelationshipER extends DiagramElement {
         pk = new MenuItem("Primary key");
         att = new MenuItem("Attribute");
         delete = new MenuItem("Delete");
-        contextMenu.getItems().addAll(attributes, changeName);
+        contextMenu.getItems().addAll(attributes, changeName, delete);
         attributes.getItems().addAll(att, pk);
         initializeMenuEvents();
     }
@@ -201,6 +219,7 @@ public class RelationshipER extends DiagramElement {
     @Override
     protected void deleteChildren() {
         children.forEach(x -> x.deleteChildren());
+        erd.getRelationships().remove(relationship);
         root.getChildren().remove(group);
 
     }
