@@ -44,18 +44,20 @@ public class CardinalityER extends DiagramElement {
             cardinality.setEntity(this.entity.entity);
             if(relationship != null)
                 drawPane();
+            // Centramento linea sulla entità
             line.setEndX(entity.group.getLayoutX()
                     + entity.group.localToScene(entity.group.getLayoutBounds()).getWidth() / 2);
             line.setEndY(entity.group.getLayoutY()
                     + entity.group.localToScene(entity.group.getLayoutBounds()).getHeight() / 2);
+            // Centramento per quando la entità si muove in giro
             entity.group.layoutXProperty().addListener((obs, oldVal, newVal) -> {
                 line.setEndX(newVal.doubleValue()
                         + entity.group.localToScene(entity.group.getLayoutBounds()).getWidth() / 2);
             });
-            entity.group.layoutYProperty().addListener((obs, oldVal, newVal) -> {
+            entity.group.layoutYProperty().addListener((obs, oldVal, newVal) ->
                 line.setEndY(newVal.doubleValue()
-                        + entity.group.localToScene(entity.group.getLayoutBounds()).getHeight() / 2);
-            });
+                        + entity.group.localToScene(entity.group.getLayoutBounds()).getHeight() / 2)
+            );
         }
     }
     public void setRelationship(RelationshipER relationship) {
@@ -65,12 +67,12 @@ public class CardinalityER extends DiagramElement {
             cardinality.setRelationship(this.relationship.relationship);
             if(entity != null)
                 drawPane();
+            // Centramento linea con eventi su relazione
             relationship.label.widthProperty().addListener((obs, oldVal, newVal) -> {
                 line.setStartX(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinX()
                         - root.localToScene(root.getLayoutBounds()).getMinX()
                         + relationship.group.localToScene(relationship.group.getLayoutBounds()).getWidth() / 2);
             });
-
             relationship.label.heightProperty().addListener((obs, oldVal, newVal) -> {
                 line.setStartY(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinY()
                         - root.localToScene(root.getLayoutBounds()).getMinY()
@@ -82,14 +84,13 @@ public class CardinalityER extends DiagramElement {
                         + relationship.group.localToScene(relationship.group.getLayoutBounds()).getWidth() / 2);
             });
             relationship.group.layoutYProperty().addListener((obs, oldVal, newVal) -> {
-
                 line.setStartY(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinY()
                         - root.localToScene(root.getLayoutBounds()).getMinY()
                         + relationship.group.localToScene(relationship.group.getLayoutBounds()).getHeight() / 2);
             });
 
 
-
+            // Imposta il valore iniziale per centrarla alla relazione
             line.setStartX(relationship.group.localToScene(relationship.group.getLayoutBounds()).getMinX()
                     - root.localToScene(root.getLayoutBounds()).getMinX()
                     + relationship.group.localToScene(relationship.group.getLayoutBounds()).getWidth() / 2);
@@ -97,6 +98,7 @@ public class CardinalityER extends DiagramElement {
                     - root.localToScene(root.getLayoutBounds()).getMinY()
                     + relationship.group.localToScene(relationship.group.getLayoutBounds()).getHeight() / 2);
         }
+        // Centramento label con eventi
         line.startXProperty().addListener((obs, oldVal, newVal) -> {
             c1.setLayoutX(newVal.doubleValue() + line.getEndX() - (newVal.doubleValue() + line.getEndX())/2);
         });
@@ -119,24 +121,11 @@ public class CardinalityER extends DiagramElement {
                 + (max == Cardinality.MANY_CARD ? MANY_VALUE : String.valueOf(max)));
     }
     private void replaceCardinality(Cardinality newCardinality) {
-        //if(relationship.relationship.getLinks().size() > 2 && newCardinality.getClass().equals(relationship.relationship.getLinks().get(0))) {
-            //System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
             cardinality.getRelationship().getLinks().remove(cardinality);
             cardinality = Cardinality.copyCardinality(cardinality, newCardinality);
             cardinality.getRelationship().getLinks().add(cardinality);
             entity.entity.changed();
-            //System.out.println("Changed:\t\t\t"+(relationship.relationship.getLinks().stream().anyMatch(cardinality1 -> cardinality1.equals(cardinality))));
-            //System.out.println("Cardinality: \t\t\t\t\t"+cardinality.getEntity());
-            //erd.getRelationships().forEach((relationship) -> relationship.getLinks().forEach((cardinality) -> System.out.println(cardinality.getEntity())));
-
-            //System.out.println(cardinality.getClass());
-            //System.out.println("CIAO");
-            //System.out.println(relationship.relationship.getLinks().contains(cardinality));
-            //relationship.relationship.getLinks().forEach(x->System.out.println(x.getEntity().getName()));
-            //System.out.println("CIAO");
             resetTextLabel();
-        //}
-
     }
     private void initializeMenuEvents() {
         many.setOnAction(event -> {
@@ -193,6 +182,10 @@ public class CardinalityER extends DiagramElement {
     protected void deleteChildren() {
         children.forEach(DiagramElement::deleteChildren);
         root.getChildren().removeAll(line, c1);
-        relationship.relationship.getLinks().remove(cardinality);
+        if(cardinality != null && relationship != null)
+            relationship
+                    .relationship
+                    .getLinks()
+                    .remove(cardinality);
     }
 }

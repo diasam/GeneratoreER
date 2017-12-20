@@ -43,33 +43,7 @@ public class Relationship implements Generable {
         return erd;
     }
     private void setCardinalityOneMore() {
-        /*removeTable();
-        links.stream()
-            .filter((cardinality) -> cardinality instanceof One || cardinality instanceof OnlyOne)
-            .findFirst()
-            .ifPresent((one) ->
-                links.stream()
-                        .filter((cardinality) -> cardinality instanceof Many || cardinality instanceof OneOrMore)
-                        .findFirst()
-                        .ifPresent((many) -> {
-                            if(attributes.size() > 0)
-                                createTable(  new Entity(getName()
-                                            , attributes
-                                            , one.getEntity().getPrimaryKeys()
-                                            , links.stream()
-                                                .map((cardinality) -> cardinality.getEntity())
-                                                .collect(Collectors.toList())));
 
-                            else
-                                Optional.ofNullable(many.getEntity())
-                                        .ifPresent((entityM ->
-                                                Optional.ofNullable(one.getEntity()).ifPresent(entityO ->
-                                                        entityO.addDependency(entityM))
-                                        ));
-                        })
-        );
-        dependency = true;
-        */
         removeTable();
         links.stream()
                 .filter((cardinality) -> cardinality instanceof One || cardinality instanceof OnlyOne)
@@ -134,7 +108,6 @@ public class Relationship implements Generable {
     public void setOneToOneFk(Table t){
         if(t != null) {
             links.stream()
-                    //TODO Documentare
                     .filter(x -> x.getEntity() != null)
                     .filter((x) -> !x.getEntity().equals(t))
                     .findFirst()
@@ -153,21 +126,19 @@ public class Relationship implements Generable {
         }
 
         else if(links.stream().allMatch(cardinalityConsumer -> cardinalityConsumer.getClass().equals(c))
-                && links.stream().allMatch(cardinalityConsumer -> cardinalityConsumer instanceof Many || cardinalityConsumer instanceof OneOrMore)) {
+                && links.stream().allMatch(cardinalityConsumer -> cardinalityConsumer instanceof Many
+                                                                  || cardinalityConsumer instanceof OneOrMore)) {
             links.add(cardinality);
             flag = true;
         }
-        //System.out.println("Flag: \t\t\t"+flag);
         if(flag)
             checkCardinalities();
         return flag;
     }
     public void removeCardinality(Cardinality cardinality) {
+        // Problema quando si cercano di eliminare delle entità
+        // che hanno più dipendenze
         links.remove(cardinality);
-        //int rType = checkCardinalities();
-        //if(rType == links.size())
-
-
     }
     public int checkCardinalities() {
         int cnt = -1;
@@ -176,7 +147,6 @@ public class Relationship implements Generable {
             for(Cardinality c : links) {
                 if((c instanceof Many) || (c instanceof OneOrMore)) {
                     cnt++;
-                    System.out.println("Classe:\t\t\t\t\t\t"+c.getClass());
                 }
             }
             /**
@@ -189,10 +159,11 @@ public class Relationship implements Generable {
              * Relazione uno-molti
              */
             else if(cnt > 0) {
-                //System.out.println("asdkhjadsfh is: \t\t"+attributes.isEmpty());
-                if (attributes.isEmpty())
-                   setCardinalityOneMore();
-                else
+                // Non funziona quando si cambiano le cardinalità
+                // Le dipendenze devono essere spostate nella cardinalità
+                //if (attributes.isEmpty())
+                //   setCardinalityOneMore();
+                //else
                     setCardinalityManyMany();
             }
             /**
@@ -201,7 +172,6 @@ public class Relationship implements Generable {
             else if(cnt == 0){
                 setCardinalityOneToOne();
             }
-            System.out.println("Cnt is: \t\t"+cnt);
         }
         return cnt;
     }
@@ -225,5 +195,8 @@ public class Relationship implements Generable {
     @Override
     public String accept(Database database) {
         return database.generate(this);
+    }
+    public void delete() {
+
     }
 }

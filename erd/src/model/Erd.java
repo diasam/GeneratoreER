@@ -34,20 +34,18 @@ public class Erd implements Generable {
     }
 
     private void orderEntities() {
-        Table e;
+        Table temp;
         for(int i = 0; i < tables.size(); i++) {
-            e = tables.get(i);
+            temp = tables.get(i);
             for(int j = i + 1; j < tables.size(); j++) {
-                if(e.getDependencies().contains(tables.get(j))) {
+                if(temp.getDependencies().contains(tables.get(j))) {
                     Collections.swap(tables, i, j);
                 }
             }
         }
-
     }
 
     public List<Relationship> getRelationships() {
-        relationships.forEach(relationship -> relationship.getLinks().forEach(cardinality -> System.out.println(cardinality.getEntity())));
         return relationships;
     }
 

@@ -65,6 +65,7 @@ public class RelationshipER extends DiagramElement {
         initializeRelationshipEvents();
     }
     private void initializeRelationshipEvents() {
+        // Centramento label
         label.textProperty().addListener((obs, oldVal, newVal) -> {
             relationship.setName(newVal);
         });
@@ -82,6 +83,7 @@ public class RelationshipER extends DiagramElement {
             double diagonal = Math.sqrt(Math.pow(h, 2) + Math.pow(w, 2));
             label.setLayoutY(diagonal / 4 - label.getHeight() / 2);
         });
+        // Movimento della relazione
         group.setOnMouseDragged(e -> {
             if(e.getButton().compareTo(MouseButton.PRIMARY) == 0)
                 group.relocate(
@@ -92,6 +94,7 @@ public class RelationshipER extends DiagramElement {
                                 - root.localToScene(root.getLayoutBounds()).getMinY()
                                 - group.localToScene(group.getLayoutBounds()).getHeight() / 2);
         });
+        // Collegamento relazione-entità
         group.setOnMouseClicked(e -> {
             if(e.getButton().compareTo(MouseButton.PRIMARY) == 0 && e.isShiftDown()) {
                 CardinalityER c = new CardinalityER(root, erd);
@@ -111,15 +114,19 @@ public class RelationshipER extends DiagramElement {
                                     c.setEntity((EntityER) x);
                                 }
                             });
+                            ChronoEvents.getInstance().getEvents().removeListener(listener);
+                            listener = null;
                         }
+
+
                     };
                     ChronoEvents.getInstance().getEvents().addListener(listener);
-                    ChronoEvents.getInstance().getEvents().addListener((ListChangeListener) event -> {
+                    /*ChronoEvents.getInstance().getEvents().addListener((ListChangeListener) event -> {
                         if(listener != null) {
                             ChronoEvents.getInstance().getEvents().removeListener(listener);
                             listener = null;
                         }
-                    });
+                    });*/
                 }
                 else {
                     c.cardinality = Cardinality.factoryByType(relationship.getLinks().get(0));
@@ -135,15 +142,16 @@ public class RelationshipER extends DiagramElement {
                                         c.setEntity((EntityER) x);
                                     }
                                 });
+                                ChronoEvents.getInstance().getEvents().removeListener(listener);
                             }
                         };
                         ChronoEvents.getInstance().getEvents().addListener(listener);
-                        ChronoEvents.getInstance().getEvents().addListener((ListChangeListener) event -> {
+                        /*ChronoEvents.getInstance().getEvents().addListener((ListChangeListener) event -> {
                             if(listener != null) {
                                 ChronoEvents.getInstance().getEvents().removeListener(listener);
                                 listener = null;
                             }
-                        });
+                        });*/
                     }
                 }
 
@@ -219,8 +227,8 @@ public class RelationshipER extends DiagramElement {
     @Override
     protected void deleteChildren() {
         children.forEach(x -> x.deleteChildren());
-        erd.getRelationships().remove(relationship);
         root.getChildren().remove(group);
+        erd.getRelationships().remove(relationship);
 
     }
     private void addLastFromFactory() {

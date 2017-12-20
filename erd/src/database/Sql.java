@@ -24,7 +24,6 @@ public class Sql extends Database {
     }
     @Override
     public String getScript(Erd erd) {
-        //erd.getRelationshipTables().stream().map(x -> script.getOrDefault(x, "not defined")).forEach(System.out::println);
         Stream.concat(erd.getTables().stream(), erd.getRelationshipTables().stream()).forEach((x) -> {
                 removeLast(x);
                 newLine(x);
@@ -41,8 +40,6 @@ public class Sql extends Database {
     }
     @Override
     public String generate(NormalAttribute normalAttribute) {
-        System.out.println(normalAttribute.getName().concat(" ")
-                .concat(normalAttribute.getDataType().accept(this)));
         return normalAttribute.getName().concat(" ")
                 .concat(normalAttribute.getDataType().accept(this));
 
@@ -50,88 +47,30 @@ public class Sql extends Database {
 
     @Override
     public String generate(PrimaryKey primaryKey) {
-        //append(primaryKey.getTable(), primaryKey.getName().concat("")
-        //        .concat(primaryKey.getDataType().accept(this)));
-        return ""
-                //.concat(primaryKey.getName().concat(" "))
-                //.concat(primaryKey.getDataType().accept(this))
-                //.concat(", PRIMARY KEY(")
-                .concat(primaryKey.getName());
-                //.concat(")");
-
-        //return primaryKey.getName();
+        return primaryKey.getName();
     }
 
     @Override
     public String generate(ForeignKey foreignKey) {
 
-
-        return !foreignKey.isPrimaryKey()
-                ? "FOREIGN KEY ("
-                    .concat(foreignKey.getName())
-                    .concat(") REFERENCES ")
-                    .concat(foreignKey.getReference().getName())
-                    .concat("(")
-                    .concat(foreignKey.getName()
-                    .concat(")"))
-                : foreignKey.getName().concat(" ")
-                    .concat(foreignKey.getDataType().accept(this))
-                    .concat(" ")
-                    .concat(foreignKey.getName().concat(",\n\t"))
-                    //TODO Documentare bug
-                    //.concat(foreignKey.getDataType().accept(this))
-                    //.concat(", ")
-                    .concat("FOREIGN KEY (")
+        return "FOREIGN KEY ("
                     .concat(foreignKey.getName())
                     .concat(") REFERENCES ")
                     .concat(foreignKey.getReference().getName())
                     .concat("(")
                     .concat(foreignKey.getName()
                     .concat(")"));
-
-
-        // last
-        /*
-        return  foreignKey.getName().concat(" ")
-                .concat(foreignKey.getDataType().accept(this))
-                .concat(" ")
-                .concat(",\n\t")
-                //TODO Documentare bug
-                //.concat(foreignKey.getDataType().accept(this))
-                //.concat(", ")
-                .concat("FOREIGN KEY (")
-                .concat(foreignKey.getName())
-                .concat(") REFERENCES ")
-                .concat(foreignKey.getReference().getName())
-                .concat("(")
-                .concat(foreignKey.getName()
-                .concat(")"));
-                */
-        /*
-        append(foreignKey, foreignKey.getName().concat(" "));
-        foreignKey.getDataType().accept(this);
-        append(foreignKey, ", ");
-        newLine(foreignKey);
-        append(foreignKey, "FOREIGN KEY ("
-                .concat(foreignKey.getName())
-                .concat(") REFERENCES ")
-                .concat(foreignKey.getReference().getName())
-                .concat("(")
-                .concat(foreignKey.getName()
-                .concat(")")));*/
     }
     @Override
     public String generate(Erd erd) {
-
         append(erd,"create database if not exists ");
         append(erd, erd.getName().concat(";"));
         newLine(erd);
         append(erd, "use ". concat(erd.getName()).concat(";"));
         newLine(erd);
-        erd.getTables().stream().filter((x) -> x.getDependencies().size() == 0)
-                .forEach((x) -> {
-                    x.accept(this);
-                });
+        erd.getTables().stream()
+                .filter((x) -> x.getDependencies().size() == 0)
+                .forEach((x) -> x.accept(this));
         erd.getRelationships().stream()
                 .forEach((x) -> x.accept(this));
         erd.getRelationshipTables().stream()
@@ -141,7 +80,6 @@ public class Sql extends Database {
     @Override
     public String generate(Entity entity) {
         if(!tablesCreated.containsKey(entity)) {
-
             tablesCreated.put(entity, true);
             done = false;
             append(entity, "create table ".concat(entity.getName()).concat(" ("));
@@ -151,8 +89,8 @@ public class Sql extends Database {
             entity.getNormalAttributes().stream().forEach((normalAttribute) -> {
                 append(entity, normalAttribute.accept(this).concat(","));
                 done = true;
-
             });
+            // Aggiunge una nuova linea
             if (done) {
                 newLine(entity);
                 done = false;
@@ -163,13 +101,17 @@ public class Sql extends Database {
                     .concat(", \n\t")));
             removeLast(entity);
 
-            append(entity, "PRIMARY KEY (");
+            if(entity.getPrimaryKeys().size() > 0) {
+                append(entity, "PRIMARY KEY (");
+            }
             entity.getPrimaryKeys().stream().forEach((primaryKey) -> {
                 append(entity, primaryKey.accept(this).concat(","));
                 done = true;
             });
-            removeLast(entity);
-            append(entity,"),");
+            if(entity.getPrimaryKeys().size() > 0) {
+                removeLast(entity);
+                append(entity, "),");
+            }
             if (done) {
                 newLine(entity);
                 done = false;
@@ -178,8 +120,8 @@ public class Sql extends Database {
             entity.getForeignKeys().stream().forEach((foreignKey) -> {
                 if (!script.get(entity).contains(foreignKey.getName() + " " + foreignKey.getDataType()))
                     append(entity, foreignKey.getName().concat(" ")
-                            .concat(foreignKey.getDataType().accept(this))
-                            .concat(", \n\t"));
+                                    .concat(foreignKey.getDataType().accept(this))
+                                    .concat(", \n\t"));
                 append(entity, foreignKey.accept(this).concat(","));
                 done = true;
             });
